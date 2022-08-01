@@ -29,10 +29,10 @@ val grader: SourceSet by sourceSets.creating {
 
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
-    "graderCompileOnly"("org.sourcegrade:jagr-launcher:0.4.0") {
+    "graderCompileOnly"("org.sourcegrade:jagr-launcher:0.5.0") {
         exclude("org.jetbrains", "annotations")
     }
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
 }
 
 application {
