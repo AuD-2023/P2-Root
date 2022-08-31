@@ -1,0 +1,8 @@
+[libraries]
+annotations = "org.jetbrains:annotations:23.0.0"
+jagr-launcher = "org.sourcegrade:jagr-launcher:0.5.0"
+junit-core = { module = "org.junit.jupiter:junit-jupiter", version = "5.9.0" }
+
+[plugins]
+style = { id = "org.sourcegrade.style", version = "2.0.0" }
+submitter = { id = "org.sourcegrade.submitter", version = "0.5.2" }
