@@ -9,10 +9,6 @@ plugins {
 
 version = file("version").readLines().first()
 
-repositories {
-    mavenCentral()
-}
-
 submit {
     assignmentId = "h_id_"
     studentId = "ab12cdef"
