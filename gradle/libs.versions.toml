@@ -1,8 +1,12 @@
+[versions]
+algoutils = "0.4.0"
+
 [libraries]
 annotations = "org.jetbrains:annotations:23.0.0"
-jagr-launcher = "org.sourcegrade:jagr-launcher:0.5.0"
-junit-core = { module = "org.junit.jupiter:junit-jupiter", version = "5.9.0" }
+algoutils-student = { module = "org.tudalgo:algoutils-student", version.ref = "algoutils" }
+algoutils-tutor = { module = "org.tudalgo:algoutils-tutor", version.ref = "algoutils" }
+junit-core = { module = "org.junit.jupiter:junit-jupiter", version = "5.9.1" }
 
 [plugins]
 style = { id = "org.sourcegrade.style", version = "2.1.0" }
-submitter = { id = "org.sourcegrade.submitter", version = "0.5.2" }
+jagr-gradle = { id = "org.sourcegrade.jagr-gradle", version = "0.6.2" }
