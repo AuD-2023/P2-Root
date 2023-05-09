@@ -1,14 +1,16 @@
 package p2;
 
+import p2.storage.StorageInterval;
+
 import java.util.List;
 
 public interface AllocationStrategy {
 
-    List<DiskSegment> allocate(int size);
+    List<StorageInterval> allocate(int size);
 
     interface Factory {
 
-        AllocationStrategy create(Disk disk);
+        AllocationStrategy create(FileSystem disk);
 
     }
 

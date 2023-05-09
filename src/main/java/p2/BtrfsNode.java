@@ -1,14 +1,15 @@
 package p2;
 
+import p2.storage.StorageInterval;
+
 public class BtrfsNode {
 
-    DiskSegment[] keys;
+    StorageInterval[] keys;
     BtrfsNode[] children;
     int[] index;
 
     public BtrfsNode(int n) {
-        keys = new DiskSegment[n];
+        keys = new StorageInterval[n];
         children = new BtrfsNode[n + 1];
     }
-
 }

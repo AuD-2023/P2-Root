@@ -2,20 +2,19 @@ package p2;
 
 import java.util.List;
 
-public class Disk {
+public class FileSystem {
 
     Integer[] data;
-    List<BtrfsFile<?>> files;
+    List<BtrfsFile> files;
 
     AllocationStrategy allocator;
 
-    public Disk(AllocationStrategy.Factory factory, int size) {
+    public FileSystem(AllocationStrategy.Factory factory, int size) {
         this.allocator = factory.create(this);
         Integer[] data = new Integer[size];
     }
 
     public void garbageCollect() {
-
     }
 
 }
