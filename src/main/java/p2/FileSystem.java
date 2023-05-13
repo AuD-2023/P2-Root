@@ -1,5 +1,7 @@
 package p2;
 
+import p2.btrfs.BtrfsFile;
+
 import java.util.List;
 
 public class FileSystem {
@@ -15,6 +17,7 @@ public class FileSystem {
     }
 
     public void garbageCollect() {
+
     }
 
 }

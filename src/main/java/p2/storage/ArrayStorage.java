@@ -1,11 +1,15 @@
 package p2.storage;
 
+import p2.AllocationStrategy;
+
 class ArrayStorage implements Storage {
 
     final byte[] data;
+    AllocationStrategy allocationStrategy;
 
-    public ArrayStorage(int size) {
+    public ArrayStorage(int size, AllocationStrategy allocationStrategy) {
         data = new byte[size];
+        this.allocationStrategy = allocationStrategy;
     }
 
     @Override
@@ -14,7 +18,12 @@ class ArrayStorage implements Storage {
     }
 
     @Override
-    public void write(int start, byte[] data) {
-        System.arraycopy(data, 0, this.data, start, data.length);
+    public void write(int start, byte[] data, int length) {
+        System.arraycopy(data, 0, this.data, start, length);
+    }
+
+    @Override
+    public AllocationStrategy getAllocationStrategy() {
+        return allocationStrategy;
     }
 }

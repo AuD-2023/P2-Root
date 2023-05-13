@@ -15,6 +15,32 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.NonExtendable
 public interface StorageView {
 
+    StorageView EMPTY = new StorageView() {
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public byte get(int index) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: 0");
+        }
+
+        @Override
+        public void forEachByte(ByteConsumer consumer) {
+        }
+
+        @Override
+        public StorageView plus(StorageView other) {
+            return other;
+        }
+
+        @Override
+        public StorageView slice(StorageInterval interval) {
+            return this;
+        }
+    };
+
     int size();
 
     byte get(int index);
