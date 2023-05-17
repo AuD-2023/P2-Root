@@ -44,213 +44,273 @@ public class BtrfsFile {
             split(null, root, 0);
         }
 
+
         //insert the intervals into the tree
-        for (int i = 0; i < data.length; i++) {
-            insert(start + i, intervals.get(i), root);
-        }
+
+        insert(start, intervals, root, new LinkedParentList(null, null, -1), 0, 0);
 
     }
 
-    public void insert(int start, Interval interval, BtrfsNode node) {
+    //TODO can be a lot easier:
+    // 1. find leaf node to insert into
+    // 2. insert into leaf node until full
+    // 3. split leaf node
+    // 4. repeat 2. with one of the two leaf nodes
 
-        //information about parent for splitting
-        BtrfsNode previousNode;
-        int previousIndex;
+    public int insert(int start, List<Interval> intervals, BtrfsNode node, LinkedParentList parent, int cumulativeLength, int insertedLength) {
 
-        // descend into the tree
-        outer:
-        while (true) {
+        //iterate over all keys and children
+        for (int i = 0; i < 2 * degree - 1; i++) {
+            //before i-th child and i-th key
 
-            //the length of all keys and children up to the currently considered position
-            int cumulativeLength = 0;
+            // if a child exists and the key should be inserted before the
+                // i-th key, insert it (start == index of i-th key -> insert before)
+            if (node.children[i] != null && start + insertedLength < cumulativeLength + node.childLength[i] + 1) {
 
-            //iterate over all keys and children
-            for (int i = 0; i < node.size; i++) {
-                //before i-th child and i-th key
+                //split if necessary
+                if (isFull(node)) {
 
-                // if a child exists and the key should be inserted before the
-                // i-th key (start == index of i-th key -> insert before)
-                if (node.children[i] != null && start <= cumulativeLength + node.childLength[i] + 1) {
+                    LinkedParentList currentParent = new LinkedParentList(parent, node, i);
 
-                    //update current and previous node
-                    previousNode = node;
-                    node = node.children[i];
-                    previousIndex = i;
+                    split(currentParent, node.children[i], 0);
 
-                    //split if necessary
-                    if (isFull(node)) {
-                        split(previousNode, node, previousIndex);
+                    //splitting might have changed the position where we currently are -> update via parent list
+                    node = currentParent.node;
+                    i = currentParent.index;
 
-                        //check again where we have to insert
-                        i--;
-                        continue;
-                    }
-
-                    //update the length of the child we are inserting the node into
-                    node.childLength[i] += interval.length();
-
-
-                    continue outer;
+                    //check again where we have to insert
+                    i--;
+                    continue;
                 }
 
-                cumulativeLength += node.childLength[i];
+                int previousInsertedLength = insertedLength;
+                LinkedParentList currentParent = new LinkedParentList(parent, node, i);
 
-                // if we insert it at the position of the i-th key and there is no child,
+                //insert the interval into the child
+                insertedLength = insert(start, intervals, node.children[i], currentParent, cumulativeLength, insertedLength);
+
+                //splitting might have changed the position where we currently are -> update via parent list
+                node = currentParent.node;
+                i = currentParent.index;
+
+                //update the length of the child we are inserting the node into
+                node.childLength[i] += insertedLength - previousInsertedLength;
+
+                //check if we have inserted everything
+                if (intervals.isEmpty()) {
+                    return insertedLength;
+                }
+            }
+
+            cumulativeLength += node.childLength[i];
+
+                // if we reached the end of the current node, and we are inserting it after the current position, we are done for this node
+            if (node.keys[i] == null && start + cumulativeLength > cumulativeLength) {
+                return insertedLength;
+            }
+
+            //if we insert it at the position of the i-th key and there is no child,
                 // move keys to the right and insert the key into the current node
-                if (start == cumulativeLength + 1) {
+            if (start + insertedLength == cumulativeLength) {
 
-                    //move keys to the right; children and childLengths are not affected because they don't exist
+                //move keys to the right if they exist; children and childLengths are not affected because they don't exist (we always insert into a leaf node)
+                if (node.keys[i] != null) {
                     System.arraycopy(node.keys, i, node.keys, i + 1, node.size - i);
-
-                    //update size of current node
-                    node.size++;
-
-                    //insert the interval into the node
-                    node.keys[i] = interval;
-
-                    //we are done
-                    return;
                 }
+
+                //update size of current node
+                node.size++;
+
+                //insert the interval into the node
+                node.keys[i] = intervals.get(0);
+
+                //remove the interval from the list
+                intervals.remove(0);
+
+                //check if we have inserted everything
+                if (intervals.isEmpty()) {
+                    return insertedLength;
+                }
+
+                //update cumulative and inserted length
+                cumulativeLength += node.keys[i].length();
+                insertedLength += node.keys[i].length();
+
+                //continue with next child
+                continue;
+            }
 
                 // if start is less than the length up to the end of the i-th key but didn't get
                 // inserted before (-> start is inside the i-th key),
                 // we have to split the key into two keys and insert the interval between them.
-                if (start < cumulativeLength + node.keys[i].length()) {
-                    Interval oldInterval = node.keys[i];
+                if (node.keys[i] != null && start + insertedLength <= cumulativeLength + node.keys[i].length()) {
 
-                    //create new intervals for the left and right part of the old interval
-                    Interval newLeftInterval = new Interval(oldInterval.start(), start - oldInterval.start());
-                    Interval newRightInterval = new Interval(newLeftInterval.start() + interval.length(),
+                //store the original interval
+                Interval oldInterval = node.keys[i];
+
+                //create new intervals for the left and right part of the old interval
+                Interval newLeftInterval = new Interval(oldInterval.start(), (cumulativeLength + oldInterval.length()) - start);
+                Interval newRightInterval = new Interval(newLeftInterval.start() + newLeftInterval.length(),
                         oldInterval.length() - newLeftInterval.length());
 
-                    //store the new left interval in the node
-                    node.keys[i] = newLeftInterval;
+                //store the new left interval in the node
+                node.keys[i] = newLeftInterval;
 
-                    //insert the new right interval behind the new left interval
-                    insert(start - cumulativeLength + newLeftInterval.length() + 1, newRightInterval, node);
+                //add the new right interval to the end of the list of intervals to insert
+                intervals.add(newRightInterval);
 
-                    //insert the original interval between the two new intervals
-                    //because we split a 2 * degree - 2 we can still insert the new node
-                    insert(start - cumulativeLength + newLeftInterval.length() + 1, interval, node);
+                //update cumulative length
+                cumulativeLength += newLeftInterval.length();
 
-                    //we are done
-                    return;
-                }
-
+                //we don't have to change anything else because we didn't insert a completely new key
+                continue;
             }
 
-            //The key does not fit into any child and came after every node, so we insert it at the end of the current node
-            node.keys[node.size] = interval;
-            node.size++;
-            break;
+            //we either inserted an interval continued or already returned
+            if (node.keys[i] == null) {
+                throw new AssertionError();
+            }
+
+            //if start is greater than the length up to the end of the i-th key, we just continue with the next key
+            cumulativeLength += node.keys[i].length();
         }
+
+        //try to insert into the last child
+        if (node.children[2 * degree - 1] != null && start + insertedLength < cumulativeLength + node.childLength[2 * degree - 1] + 1) {
+
+            int previousInsertedLength = insertedLength;
+
+            //insert the interval into the child
+            insertedLength = insert(start, intervals, node.children[2 * degree - 1], new LinkedParentList(parent, node, 2 * degree - 1), cumulativeLength, insertedLength);
+
+            //update the length of the child we are inserting the node into
+            node.childLength[2 * degree - 1] += insertedLength - previousInsertedLength;
+        }
+
+        return insertedLength;
 
     }
 
     private boolean isFull(BtrfsNode node) {
-        return node.size >= 2 * degree - 2;
+        return node.size > 2 * degree - 1;
     }
 
-    public void split(BtrfsNode parent, BtrfsNode child, int parentIndex) {
+    public void split(LinkedParentList parent, BtrfsNode node, int index) {
 
-        // we already split when there is only one free space left in the node (2 * degree - 2 keys)
-        // because we might need to split an existing key when inserting a new one
-        if (child.size < 2 * degree - 2) {
-            throw new IllegalArgumentException("Node must have at least 2*degree - 2 keys when splitting");
+
+        if (!isFull(node)) {
+            throw new IllegalArgumentException("node is not full when splitting");
         }
 
-        if (parent != null && parent.size == 2 * degree - 1) {
-            throw new IllegalArgumentException("Parent is full");
+        BtrfsNode parentNode = parent.node;
+        int parentIndex = parent.index;
+
+        if (parentNode != null && isFull(parentNode)) {
+            split(parent.parent, parentNode, parent.index);
         }
 
         //create new node
         BtrfsNode right = new BtrfsNode(degree);
 
-        //calculate length of left child
-        int leftLength = child.childLength[degree - 1];
+        //calculate length of left node
+        int leftLength = node.childLength[degree - 1];
         for (int i = 0; i < degree - 1; i++) {
-            leftLength += child.childLength[i];
-            leftLength += child.keys[i].length();
+            leftLength += node.childLength[i];
+            leftLength += node.keys[i].length();
         }
 
-        //calculate length of right child
-        int rightLength = child.childLength[2 * degree - 1];
-        for (int i = degree; i < child.size; i++) {
-            rightLength += child.childLength[i];
-            rightLength += child.keys[i].length();
+        //calculate length of right node
+        int rightLength = node.childLength[2 * degree - 1];
+        for (int i = degree; i < node.size; i++) {
+            rightLength += node.childLength[i];
+            rightLength += node.keys[i].length();
         }
 
-        //copy keys, children and childLengths to right
-        System.arraycopy(child.keys, degree, right.keys, 0, degree - 1);
-        System.arraycopy(child.children, degree, right.children, 0, degree);
-        System.arraycopy(child.childLength, degree, right.childLength, 0, degree);
+        //copy keys, children and childLengths to right node
+        System.arraycopy(node.keys, degree, right.keys, 0, degree - 1);
+        System.arraycopy(node.children, degree, right.children, 0, degree);
+        System.arraycopy(node.childLength, degree, right.childLength, 0, degree);
 
         //update sizes of left and right
-        child.size = degree - 1;
-        right.size = child.size - degree;
+        node.size = degree - 1;
+        right.size = degree - 1;
 
         //splitting the root
-        if (parent == null) {
+        if (parentNode == null) {
 
             //create new root
-            parent = new BtrfsNode(degree);
+            BtrfsNode newRoot = new BtrfsNode(degree);
 
-            //add middle key of child to parent
-            parent.keys[0] = child.keys[degree - 1];
+            //add middle key of node to parent
+            newRoot.keys[0] = node.keys[degree - 1];
 
             //add left and right to children of parent
-            parent.children[0] = child;
-            parent.children[1] = right;
+            newRoot.children[0] = node;
+            newRoot.children[1] = right;
 
             //set childLengths of parent
-            parent.childLength[0] = leftLength;
-            parent.childLength[1] = rightLength;
+            newRoot.childLength[0] = leftLength;
+            newRoot.childLength[1] = rightLength;
 
             //set sizes of parent
-            parent.size = 1;
+            newRoot.size = 1;
 
             //set new root
-            root = parent;
+            root = newRoot;
+
+            //update LinkedParentList
+            parent.node = newRoot;
 
         } else {
-            //move keys of parent to the right
-            for (int i = parent.size - 1; i >= parentIndex; i--) {
-                parent.keys[i + 1] = parent.keys[i];
+
+            //split parent if necessary
+            if (isFull(parentNode)) {
+                split(parent.parent, parentNode, parent.index);
             }
 
-            //add middle key of child to parent
-            parent.keys[parentIndex] = child.keys[degree - 1];
+            //move keys of parent to the right
+            for (int i = parentNode.size - 1; i >= parentIndex; i--) {
+                parentNode.keys[i + 1] = parentNode.keys[i];
+            }
 
             //move children and childrenLength of parent to the right
-            for (int i = parent.size; i > parentIndex; i--) {
-                parent.children[i + 1] = parent.children[i];
-                parent.childLength[i + 1] = parent.childLength[i];
+            for (int i = parentNode.size; i > parentIndex; i--) {
+                parentNode.children[i + 1] = parentNode.children[i];
+                parentNode.childLength[i + 1] = parentNode.childLength[i];
             }
 
+            //add middle key of node to parent
+            parentNode.keys[parentIndex] = node.keys[degree - 1];
+
             //add right to children of parent
-            parent.children[parentIndex + 1] = right;
+            parentNode.children[parentIndex + 1] = right;
 
             //set childLengths of parent
-            parent.childLength[parentIndex + 1] = rightLength;
+            parentNode.childLength[parentIndex + 1] = rightLength;
 
             //update size of parent
-            parent.size++;
+            parentNode.size++;
+
+            //update LinkedParentList
+            if (index > degree - 1) {
+                parent.node = right;
+                parent.index = index - degree;
+            }
         }
 
-        //remove unused children from old node to allow garbage collection
+        //reset removed elements of node
         for (int i = degree; i < 2 * degree; i++) {
-            child.children[i] = null;
+            node.children[i] = null;
+            node.childLength[i] = 0;
+            node.keys[i] = null;
         }
     }
 
     public StorageView read(int start, int length) {
-        return read(start, length, root);
+        return read(start, length, root, 0, 0);
     }
 
-    public StorageView read(int start, int length, BtrfsNode node) {
-
-        int cumulativeLength = 0;
-        int lengthRead = 0;
+    public StorageView read(int start, int length, BtrfsNode node, int cumulativeLength, int lengthRead) {
 
         StorageView view = StorageView.EMPTY;
 
@@ -258,8 +318,8 @@ public class BtrfsFile {
             //before i-th key and i-th child.
 
             //read from i-th child if start is in front of or in the i-th child, and it exists
-            if (start < cumulativeLength + node.childLength[i] && node.children[i] != null) {
-                view = view.plus(read(start - cumulativeLength, length - lengthRead, node.children[i]));
+            if (node.children[i] != null && start < cumulativeLength + node.childLength[i]) {
+                view = view.plus(read(start, length, node.children[i], cumulativeLength, lengthRead));
                 lengthRead += Math.max(node.childLength[i], length - lengthRead);
             }
 
@@ -268,138 +328,140 @@ public class BtrfsFile {
             //check if we have read enough
             if (lengthRead == length) {
                 return view;
+            } else if (lengthRead > length) {
+                throw new AssertionError(); //sanity check
             }
 
-            //read from i-th key if start is in front of or in the i-th key
-            if (start < cumulativeLength + node.keys[i].length()) {
 
-                int viewStart = node.keys[i].start() + Math.max(0, start - cumulativeLength);
-                int viewLength = Math.min(node.keys[i].length(), length - lengthRead);
+            Interval key = node.keys[i];
+
+            //if there is no next key we are done for this node
+            if (key == null) {
+                return view;
+            }
+
+            //read from i-th key if and start is in front of or in the i-th key
+            if (start < cumulativeLength + key.length()) {
+
+                int viewStart = key.start() + Math.max(0, start - cumulativeLength);
+                int viewLength = Math.min(key.length() - (viewStart - key.start()), length - lengthRead);
 
                 view = view.plus(storage.createView(new Interval(viewStart, viewLength)));
                 lengthRead += viewLength;
             }
 
-            cumulativeLength += node.keys[i].length();
+            cumulativeLength += key.length();
 
             //check if we have read enough
             if (lengthRead == length) {
                 return view;
+            } else if (lengthRead > length) {
+                throw new AssertionError(); //sanity check
             }
         }
 
-        //we reached the last child and haven't read enough -> if it doesn't exist we hope that this isn't the root
+        //we reached the last child; read from it if it exists and return
         if (node.children[node.size] == null) {
             return view;
         }
 
-        //read from last child if it exists, and we haven't read enough
-        view = view.plus(read(start - cumulativeLength, length - lengthRead, node.children[node.size]));
+        //read from last child if it exists, because we have not read enough if we are here
+        view = view.plus(read(start, length, node.children[node.size], cumulativeLength, lengthRead));
 
         return view;
     }
 
     public void remove(int start, int length) {
-        remove(start, length, root);
+        remove(start, length, root, new LinkedParentList(null, null, -1), 0, 0);
     }
 
-    public void remove(int start, int length, BtrfsNode node) {
+    public void remove(int start, int length, BtrfsNode node, LinkedParentList parent, int cumulativeLength, int removedLength) {
 
-        LinkedParentList parent = new LinkedParentList(null, null, -1);
-        int removedLength = 0;
-        int cumulativeLength = 0;
-        int startIndex = 0;
+        //iterate over all children and keys
+        for (int i = 0; i < node.size; i++) {
+            //before i-th child and i-th child.
 
-        // descend into the tree
-        outer:
-        while (true) {
+            //check if we have removed enough
+            if (removedLength > length) {
+                throw new AssertionError(); //sanity check
+            } else if (removedLength == length) {
+                return;
+            }
 
-            //iterate over all children and keys
-            for (int i = startIndex; i < node.size; i++) {
-                //before i-th child and i-th child.
+            //remove from i-th child if start is in front of or in the i-th child, and it exists
+            if (node.children[i] != null && start <= cumulativeLength + node.childLength[i]) {
+
+                //calculate how much we will remove from the child
+                int removedInChild = Math.min(length - removedLength, node.childLength[i] - (start - cumulativeLength));
+
+                //update childLength of parent accordingly
+                node.childLength[i] -= removedInChild;
+
+                //update removedLength
+                removedLength += removedInChild;
+
+                //remove from child
+                remove(start, length, node, new LinkedParentList(parent, node, i), cumulativeLength, removedLength);
 
                 //check if we have removed enough
-                if (removedLength > length) {
-                    throw new AssertionError(); //sanity check
-                } else if (removedLength == length) {
+                if (removedLength == length) {
                     return;
+                } else if (removedLength > length) {
+                    throw new AssertionError(); //sanity check
                 }
+            }
 
-                //remove from i-th child if start is in front of or in the i-th child, and it exists
-                if (node.children[i] != null && start <= cumulativeLength + node.childLength[i]) {
+            cumulativeLength += node.childLength[i];
 
-                    ensureChildSize(parent, node.children[i], i);
+            //get the i-th key
+            Interval key = node.keys[i];
+            int keyStart = cumulativeLength + 1;
 
-                    //calculate how much we will remove from the child
-                    int removedInChild = Math.min(length - removedLength, node.childLength[i] - (start - cumulativeLength));
+            //the key might have been removed through merging
+            if (key == null) {
+                return;
+            }
 
-                    //update childLength of parent accordingly
-                    node.childLength[i] -= removedInChild;
+            //if start is in the i-th key we just have to shorten the interval
+            if (start > keyStart && start < cumulativeLength + 1 + key.length()) {
 
-                    //descend into child
-                    parent = new LinkedParentList(parent, node, i);
-                    node = node.children[i];
+                //calculate the new length of the key
+                int newLength = start - keyStart;
 
-                    //set start index for next loop
-                    startIndex = 0;
+                //update the key
+                node.keys[i] = new Interval(key.start(), newLength);
 
-                    continue outer;
-                }
+                //update removedLength
+                removedLength += key.length() - newLength;
 
-                cumulativeLength += node.childLength[i];
+                //continue with next key
+                continue;
+            }
 
-                //get the i-th key
-                Interval key = node.keys[i];
-                int keyStart = cumulativeLength + 1;
+            //if start is in front of or at the start of the i-th key we have to remove the key
+            if (start <= keyStart) {
 
-                //if start is in the i-th key we just have to shorten the interval
-                if (start > keyStart && start < cumulativeLength + 1 + key.length()) {
+                //if we are in a leaf node we can just remove the key
+                if (node.children[0] == null) {
 
-                    //calculate the new length of the key
-                    int newLength = start - (keyStart);
+                    ensureSize(parent, node);
 
-                    //update the key
-                    node.keys[i] = new Interval(key.start(), newLength);
+                    //move all keys after the removed key to the left
+                    System.arraycopy(node.keys, i + 1, node.keys, i, node.size - i - 1);
+
+                    //remove (duplicated) last key
+                    node.keys[node.size - 1] = null;
+
+                    //update size
+                    node.size--;
 
                     //update removedLength
-                    removedLength += key.length() - newLength;
+                    removedLength += key.length();
 
-                    //update cumulativeLength
-                    cumulativeLength += key.length();
+                    //the next key moved one index to the left
+                    i--;
 
-                    //continue with next key
-                    continue;
-                }
-
-                //if start is in front of or the start of the i-th key we have to remove the key
-                if (start <= keyStart) {
-
-                    //if we are in a leaf node we can just remove the key
-                    if (node.children[0] == null) {
-
-                        //move all keys after the removed key to the left
-                        System.arraycopy(node.keys, i + 1, node.keys, i, node.size - i - 1);
-
-                        //remove (duplicated) last key
-                        node.keys[node.size - 1] = null;
-
-                        //update size
-                        node.size--;
-
-                        //update removedLength
-                        removedLength += key.length();
-
-                        //update cumulativeLength
-                        cumulativeLength += key.length();
-
-                        //the next key moved one index to the left
-                        i--;
-
-                        //continue with next key
-                        continue;
-                    }
-
-                    //remove key from inner node
+                } else { //remove key from inner node
 
                     //try to replace with rightmost key of left child
                     if (node.children[i].size >= degree) {
@@ -411,11 +473,11 @@ public class BtrfsFile {
                         //update key
                         node.keys[i] = removedKey;
 
-                        continue;
-                    }
+                        //update removedLength
+                        removedLength += key.length();
 
-                    //try to replace with leftmost key of right child
-                    if (node.children[i + 1].size >= degree) {
+                        //try to replace with leftmost key of right child
+                    } else if (node.children[i + 1].size >= degree) {
                         Interval removedKey = removeLeftMostKey(new LinkedParentList(parent, node, i + 1), node.children[i + 1]);
 
                         //update childLength of current node
@@ -424,104 +486,73 @@ public class BtrfsFile {
                         //update key
                         node.keys[i] = removedKey;
 
-                        //update cumulativeLength
-                        cumulativeLength += key.length();
-
                         //update removedLength
                         removedLength += key.length();
 
-                        //set start index for next loop
-                        startIndex = 0;
+                        //if both children have only degree - 1 keys we have to merge them and remove the key from the merged node
+                    } else {
 
-                        continue;
+                        // save the length of the left and right child before merging because we need them later
+                        int leftNodeLength = node.childLength[i];
+                        int rightNodeLength = node.childLength[i + 1];
+
+                        //merge the two children
+                        mergeWithRightChild(node, i);
+
+                        //calculate how much we will remove from the child
+                        int removedInChild = Math.min(length - removedLength, node.childLength[i] - (start - cumulativeLength - leftNodeLength));
+
+                        //remove the key from the merged node
+                        remove(leftNodeLength + 1, node.keys[i].length(), node.children[i],
+                            new LinkedParentList(parent, node, i), cumulativeLength - leftNodeLength, removedLength);
+
+                        //update childLength of current node
+                        node.childLength[i] -= removedInChild;
+
+                        //update removedLength
+                        removedLength += removedInChild;
+
+                        //add the right child to the cumulative length
+                        cumulativeLength += rightNodeLength;
                     }
-
-                    //if both children have only degree - 1 keys we have to merge them and remove the key from the merged node
-                    int leftNodeLength = lengthOfNode(node.children[i]);
-                    mergeWithRightChild(node, i);
-                    remove(leftNodeLength + 1, node.keys[i].length(), node.children[i]);
-
-                    //update childLength of current node
-                    node.childLength[i] -= key.length();
-
-                    //update cumulativeLength
-                    cumulativeLength += key.length();
-
-                    //update removedLength
-                    removedLength += key.length();
-
-                    //if the key we removed merged with the children was the last key of the node we have to update the root
-                    if (node.size == 0) {
-                        root = node.children[0];
-                    }
-
-                    continue;
 
                 }
 
-                //otherwise (if start is behind the i-th key) we just continue
-                cumulativeLength += key.length();
             }
 
-            //only the last child is left
+            // update cumulativeLength after visiting the i-th key
+            cumulativeLength += key.length();
 
-            //check if we have removed enough
-            if (removedLength > length) {
-                throw new AssertionError(); //sanity check
-            } else if (removedLength == length) {
-                return;
-            }
+        }//only the last child is left
 
-            //remove from the last child if start is in front of or in the i-th child, and it exists
-            if (node.children[node.size] != null && start <= cumulativeLength + node.childLength[node.size]) {
-
-                ensureChildSize(parent, node.children[node.size], node.size);
-
-                //calculate how much we will remove from the child
-                int removedInChild = Math.min(length - removedLength, node.childLength[node.size] - (start - cumulativeLength));
-
-                //update childLength of parent accordingly
-                node.childLength[node.size] -= removedInChild;
-
-                //descend into child
-                parent = new LinkedParentList(parent, node, node.size);
-                node = node.children[node.size];
-
-                //set start index for next loop
-                startIndex = 0;
-
-                continue;
-            }
-
-            //if we did not descend into the last child we have to continue at the parent at the index where we last stopped
-
-            //set start index for next loop
-            startIndex = parent.index;
-
-            //load parent
-            node = parent.node;
-            parent = parent.parent;
-
-            //check if we have traversed the whole tree
-            if (node == null) {
-                throw new IllegalArgumentException("start + length is out of bounds");
-            }
-
+        //check if we have removed enough
+        if (removedLength > length) {
+            throw new AssertionError(); //sanity check
+        } else if (removedLength == length) {
+            return;
         }
 
-    }
+        //remove from the last child if start is in front of or in the i-th child, and it exists
+        if (node.children[node.size] != null && start <= cumulativeLength + node.childLength[node.size]) {
 
-    private int lengthOfNode(BtrfsNode node) {
-        int length = 0;
+            //calculate how much we will remove from the child
+            int removedInChild = Math.min(length - removedLength, node.childLength[node.size] - (start - cumulativeLength));
 
-        for (int i = 0; i < node.size; i++) {
-            length += node.childLength[i];
-            length += node.keys[i].length();
+            //update childLength of parent accordingly
+            node.childLength[node.size] -= removedInChild;
+
+            //update removedLength
+            removedLength += removedInChild;
+
+            //remove from child
+            remove(start, length, node, new LinkedParentList(parent, node, node.size), cumulativeLength, removedLength);
         }
 
-        length += node.childLength[node.size];
+        //check if we have traversed the whole tree
+        if (parent.node == null) {
+            throw new IllegalArgumentException("start + length is out of bounds");
+        }
 
-        return length;
     }
 
     private Interval removeRightMostKey(LinkedParentList parent, BtrfsNode node) {
@@ -533,6 +564,8 @@ public class BtrfsFile {
 
         //check if node is a leaf
         if (node.children[0] == null) {
+
+            ensureSize(parent, node);
 
             //get right most key
             Interval key = node.keys[node.size - 1];
@@ -546,12 +579,8 @@ public class BtrfsFile {
             return key;
         } else { //if node is an inner node continue downward
 
-            //update parent
-            parent = new LinkedParentList(parent, node, node.size);
-
-            ensureChildSize(parent, node.children[node.size], node.size);
-
-            Interval key = removeRightMostKey(parent, node.children[node.size]);
+            //recursively remove from rightmost child
+            Interval key = removeRightMostKey(new LinkedParentList(parent, node, node.size), node.children[node.size]);
 
             //update childLength
             node.childLength[node.size] -= key.length();
@@ -570,6 +599,8 @@ public class BtrfsFile {
         //check if node is a leaf
         if (node.children[0] == null) {
 
+            ensureSize(parent, node);
+
             //get left most key
             final Interval key = node.keys[0];
 
@@ -585,12 +616,8 @@ public class BtrfsFile {
             return key;
         } else { //if node is an inner node continue downward
 
-            //update parent
-            parent = new LinkedParentList(parent, node, node.size);
-
-            ensureChildSize(parent, node.children[0], node.size);
-
-            final Interval key = removeLeftMostKey(parent, node.children[0]);
+            //recursively remove from leftmost child
+            Interval key = removeLeftMostKey(new LinkedParentList(parent, node, node.size), node.children[0]);
 
             //update childLength
             node.childLength[0] -= key.length();
@@ -612,24 +639,25 @@ public class BtrfsFile {
         }
     }
 
-    private void ensureChildSize(LinkedParentList parent, BtrfsNode child, int index) {
+    private void ensureSize(LinkedParentList parent, BtrfsNode node) {
 
-        //check if child has at least degree keys
-        if (child.size < degree) {
+        //check if node has at least degree keys
+        if (node.size < degree) {
 
-            //get parent node
+            //get parent node and index
             BtrfsNode parentNode = parent.node;
+            int parentIndex = parent.index;
 
             //get left and right sibling
-            BtrfsNode leftSibling = index > 0 ? parentNode.children[index - 1] : null;
-            BtrfsNode rightSibling = index < parentNode.size - 1 ? parentNode.children[index + 1] : null;
+            BtrfsNode leftSibling = parentIndex > 0 ? parentNode.children[parentIndex - 1] : null;
+            BtrfsNode rightSibling = parentIndex < parentNode.size - 1 ? parentNode.children[parentIndex + 1] : null;
 
-            //rotate a key from left or right child if possible
+            //rotate a key from left or right node if possible
             if (leftSibling != null && leftSibling.size >= degree) {
-                rotateFromLeftChild(parentNode, index);
+                rotateFromLeftChild(parentNode, parentIndex);
             } else if (rightSibling != null && rightSibling.size >= degree) {
-                rotateFromRightChild(parentNode, index);
-            } else { // if we can't rotate, merge with left or right child
+                rotateFromRightChild(parentNode, parentIndex);
+            } else { // if we can't rotate, merge with left or right node
 
                 // ensure that the parent has at least degree keys before merging
                 if (parentNode.size < degree) {
@@ -637,14 +665,19 @@ public class BtrfsFile {
                     // the root does not have to have at least degree keys
                     if (parentNode != root) {
                         // recursively fix size of parent
-                        ensureChildSize(parent.parent, parentNode, parent.index);
+                        ensureSize(parent.parent, parentNode);
                     }
                 }
 
-                if (index > 0) {
-                    mergeWithLeftChild(child, index);
+                if (parentIndex > 0) {
+                    mergeWithLeftChild(parentNode, parentIndex);
                 } else {
-                    mergeWithRightChild(child, index);
+                    mergeWithRightChild(parentNode, parentIndex);
+                }
+
+                //if the root has no keys left after merging, set the only node as the new root
+                if (root.size == 0) {
+                    root = root.children[0];
                 }
             }
         }
