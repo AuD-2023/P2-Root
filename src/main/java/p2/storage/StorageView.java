@@ -2,6 +2,9 @@ package p2.storage;
 
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -17,38 +20,12 @@ import java.util.stream.Stream;
 @ApiStatus.NonExtendable
 public interface StorageView {
 
-    StorageView EMPTY = new StorageView() {
-
-        private final StorageInterval[] intervals = new StorageInterval[0];
-
-        @Override
-        public int length() {
-            return 0;
-        }
-
-        @Override
-        public StorageInterval[] getIntervals() {
-            return intervals;
-        }
-
-        @Override
-        public void forEachByte(ByteConsumer consumer) {
-        }
-
-        @Override
-        public StorageView plus(StorageView other) {
-            return other;
-        }
-    };
-
     int length();
 
     /**
      * <b>Immutable. Do not modify this array.</b>
      */
-    StorageInterval[] getIntervals();
-
-    void forEachByte(ByteConsumer consumer);
+    Interval[] getIntervals();
 
     /**
      * Returns a new view that is the concatenation of this view and the given view.
@@ -57,25 +34,29 @@ public interface StorageView {
      */
     StorageView plus(StorageView other);
 
-    default byte[] copyToByteArray() {
-        final byte[] result = new byte[length()];
-        forEachByte((ignored, readIndex, b) -> result[readIndex] = b);
-        return result;
-    }
+    Storage getStorage();
+
+    byte[] getData();
 
     /**
      * Concatenates the given views into a single view.
      *
-     * <p><b>Does not modify any of the given views.</b>
+     * <p><b>Does not modify any of the given views.</b></p>
      */
     static StorageView concat(StorageView... views) {
         return switch (views.length) {
-            case 0 -> StorageView.EMPTY;
+            case 0 -> throw new IllegalArgumentException("Cannot concatenate zero views");
             case 1 -> views[0];
             default -> {
-                final StorageInterval[] intervals = Stream.of(views)
-                    .flatMap(view -> Stream.of(view.getIntervals())).toArray(StorageInterval[]::new);
-                yield new MultiIntervalView(intervals);
+                // assert that all views are from the same storage
+                if (Stream.of(views).map(StorageView::getStorage)
+                    .collect(Collectors.toCollection(() -> Collections.newSetFromMap(new IdentityHashMap<>())))
+                    .size() != 1) {
+                    throw new IllegalArgumentException("Cannot concatenate views from different storages");
+                }
+                final Interval[] intervals = Stream.of(views)
+                    .flatMap(view -> Stream.of(view.getIntervals())).toArray(Interval[]::new);
+                yield new MultiIntervalView(views[0].getStorage(), intervals);
             }
         };
     }

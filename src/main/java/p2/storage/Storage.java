@@ -6,9 +6,9 @@ public interface Storage {
 
     StorageView createView(Interval... intervals);
 
-    void write(int start, byte[] data, int length);
+    void write(int storagePos, byte[] source, int sourcePos, int length);
 
-    byte get(int index);
+    void read(int storagePos, byte[] dest, int destPos, int length);
 
     AllocationStrategy getAllocationStrategy();
 }

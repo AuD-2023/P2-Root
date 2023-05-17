@@ -1,43 +1,54 @@
 package p2.storage;
 
-import java.util.ArrayList;
+import org.jetbrains.annotations.Nullable;
 
 class SingleIntervalView implements StorageView {
 
-    private final StorageInterval interval;
-    private final StorageInterval[] intervals = new StorageInterval[1];
+    private final Interval interval;
+    private final Interval[] intervals = new Interval[1];
+    private final Storage storage;
+    private byte @Nullable [] data;
 
-    public SingleIntervalView(Interval interval, Storage storage) {
-        this.interval = new StorageInterval(interval, storage);
+    public SingleIntervalView(Storage storage, Interval interval) {
+        this.storage = storage;
+        this.interval = interval;
         intervals[0] = this.interval;
     }
 
     @Override
     public int length() {
-        return interval.interval().length();
+        return interval.length();
     }
 
     @Override
-    public StorageInterval[] getIntervals() {
+    public Interval[] getIntervals() {
         return intervals;
     }
 
+    private void calculateData() {
+        data = new byte[length()];
+        storage.read(interval.start(), data, 0, interval.length());
+    }
+
     @Override
-    public void forEachByte(ByteConsumer consumer) {
-        new ArrayList<String>().toArray(new String[0]);
-        final int start = interval.interval().start();
-        final int length = interval.interval().length();
-        for (int i = 0; i < length; i++) {
-            consumer.accept(start + i, i, interval.storage().get(start + i));
+    public byte[] getData() {
+        if (data == null) {
+            calculateData();
         }
+        return data;
     }
 
     @Override
     public StorageView plus(StorageView other) {
-        final StorageInterval[] otherIntervals = other.getIntervals();
-        final StorageInterval[] newIntervals = new StorageInterval[1 + otherIntervals.length];
+        final Interval[] otherIntervals = other.getIntervals();
+        final Interval[] newIntervals = new Interval[1 + otherIntervals.length];
         newIntervals[0] = interval;
         System.arraycopy(otherIntervals, 0, newIntervals, 1, otherIntervals.length);
-        return new MultiIntervalView(newIntervals);
+        return new MultiIntervalView(storage, newIntervals);
+    }
+
+    @Override
+    public Storage getStorage() {
+        return storage;
     }
 }
