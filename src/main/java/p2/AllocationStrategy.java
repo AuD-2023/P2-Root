@@ -1,12 +1,12 @@
 package p2;
 
-import p2.storage.StorageInterval;
+import p2.storage.Interval;
 
 import java.util.List;
 
 public interface AllocationStrategy {
 
-    List<StorageInterval> allocate(int size);
+    List<Interval> allocate(int size);
 
     interface Factory {
 

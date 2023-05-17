@@ -2,11 +2,13 @@ package p2.storage;
 
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.stream.Stream;
+
 /**
  * Represents a view of a {@link Storage} that is limited to a certain interval.
  *
  * <p>
- * Use {@link Storage#createView(StorageInterval)} to create a view of a storage.
+ * Use {@link Storage#createView(Interval...)} to create a view of a storage.
  * </p>
  *
  * <p><b>This view cannot be modified through any instance methods of this class.
@@ -17,13 +19,13 @@ public interface StorageView {
 
     StorageView EMPTY = new StorageView() {
         @Override
-        public int size() {
+        public int length() {
             return 0;
         }
 
         @Override
-        public byte get(int index) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: 0");
+        public StorageInterval[] getIntervals() {
+            return new StorageInterval[0];
         }
 
         @Override
@@ -34,16 +36,14 @@ public interface StorageView {
         public StorageView plus(StorageView other) {
             return other;
         }
-
-        @Override
-        public StorageView slice(StorageInterval interval) {
-            return this;
-        }
     };
 
-    int size();
+    int length();
 
-    byte get(int index);
+    /**
+     * <b>Immutable. Do not modify this array.</b>
+     */
+    StorageInterval[] getIntervals();
 
     void forEachByte(ByteConsumer consumer);
 
@@ -54,15 +54,8 @@ public interface StorageView {
      */
     StorageView plus(StorageView other);
 
-    /**
-     * Returns a new view of the given interval of this view.
-     *
-     * <p><b>Does not modify this view.</b>
-     */
-    StorageView slice(StorageInterval interval);
-
     default byte[] copyToByteArray() {
-        final byte[] result = new byte[size()];
+        final byte[] result = new byte[length()];
         forEachByte((ignored, readIndex, b) -> result[readIndex] = b);
         return result;
     }
@@ -73,11 +66,26 @@ public interface StorageView {
      * <p><b>Does not modify any of the given views.</b>
      */
     static StorageView concat(StorageView... views) {
-        return null;
+        return switch (views.length) {
+            case 0 -> EmptyStorageView.INSTANCE;
+            case 1 -> views[0];
+            default -> {
+                final StorageInterval[] intervals = Stream.of(views)
+                    .flatMap(view -> Stream.of(view.getIntervals())).toArray(StorageInterval[]::new);
+                yield new MultiIntervalView(intervals);
+            }
+        };
     }
 
     @ApiStatus.OverrideOnly
     interface ByteConsumer {
-        void accept(int storageIndex, int readIndex, byte b);
+        /**
+         * Accepts a byte from a storage view.
+         *
+         * @param storageIndex  The index in the {@link Storage} space
+         * @param intervalIndex The index in the {@link Interval} space
+         * @param b             The byte
+         */
+        void accept(int storageIndex, int intervalIndex, byte b);
     }
 }

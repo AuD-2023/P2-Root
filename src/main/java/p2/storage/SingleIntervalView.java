@@ -3,15 +3,15 @@ package p2.storage;
 class SingleIntervalView implements StorageView {
 
     private final ArrayStorage baseStorage;
-    final StorageInterval interval;
+    final Interval interval;
 
-    public SingleIntervalView(ArrayStorage baseStorage, StorageInterval interval) {
+    public SingleIntervalView(ArrayStorage baseStorage, Interval interval) {
         this.baseStorage = baseStorage;
         this.interval = interval;
     }
 
     @Override
-    public int size() {
+    public int length() {
         return baseStorage.data.length;
     }
 
@@ -34,21 +34,21 @@ class SingleIntervalView implements StorageView {
     public StorageView plus(StorageView other) {
         if (other instanceof MultiIntervalView otherTree) {
             // flatten resulting tree by adding other's children instead of the tree itself
-            SizedViewTuple[] intervals = new SizedViewTuple[1 + otherTree.getChildren().length];
-            intervals[0] = SizedViewTuple.ofEntire(this);
+            StorageInterval[] intervals = new StorageInterval[1 + otherTree.getChildren().length];
+            intervals[0] = StorageInterval.ofEntire(this);
             System.arraycopy(otherTree.getChildren(), 0, intervals, 1, otherTree.getChildren().length);
             return new MultiIntervalView(intervals);
         }
 
         // create a new node with two children: this and other
-        return new MultiIntervalView(new SizedViewTuple[]{
-            SizedViewTuple.ofEntire(this),
-            SizedViewTuple.ofEntire(other)
+        return new MultiIntervalView(new StorageInterval[]{
+            StorageInterval.ofEntire(this),
+            StorageInterval.ofEntire(other)
         });
     }
 
     @Override
-    public StorageView slice(StorageInterval interval) {
+    public StorageView slice(Interval interval) {
         return new SingleIntervalView(baseStorage, interval);
     }
 

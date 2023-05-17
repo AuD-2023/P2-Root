@@ -13,7 +13,7 @@ class ArrayStorage implements Storage {
     }
 
     @Override
-    public StorageView createView(StorageInterval interval) {
+    public StorageView createView(Interval interval) {
         return new SingleIntervalView(this, interval);
     }
 

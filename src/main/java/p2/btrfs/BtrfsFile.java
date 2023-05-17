@@ -1,7 +1,7 @@
 package p2.btrfs;
 
 import p2.storage.Storage;
-import p2.storage.StorageInterval;
+import p2.storage.Interval;
 import p2.storage.StorageView;
 
 import java.util.List;
@@ -25,17 +25,17 @@ public class BtrfsFile {
         this.degree = degree;
     }
 
-    public void write(int start, StorageInterval interval) {
+    public void write(int start, Interval interval) {
         //TODO
     }
 
     public void insert(int start, byte[] data) {
 
         // create intervals to insert
-        List<StorageInterval> storageIntervals = storage.getAllocationStrategy().allocate(data.length);
+        List<Interval> intervals = storage.getAllocationStrategy().allocate(data.length);
 
         // fill the intervals with the data
-        for (StorageInterval interval : storageIntervals) {
+        for (Interval interval : intervals) {
             storage.write(interval.start(), data, interval.length());
         }
 
@@ -46,12 +46,12 @@ public class BtrfsFile {
 
         //insert the intervals into the tree
         for (int i = 0; i < data.length; i++) {
-            insert(start + i, storageIntervals.get(i), root);
+            insert(start + i, intervals.get(i), root);
         }
 
     }
 
-    public void insert(int start, StorageInterval interval, BtrfsNode node) {
+    public void insert(int start, Interval interval, BtrfsNode node) {
 
         //information about parent for splitting
         BtrfsNode previousNode;
@@ -112,11 +112,11 @@ public class BtrfsFile {
                 //if start is less than the length up to the end of the i-th key but didn't get inserted before (-> start is inside the i-th key),
                 //we have to split the key into two keys and insert the interval between them.
                 if (start < cumulativeLength + node.keys[i].length()) {
-                    StorageInterval oldInterval = node.keys[i];
+                    Interval oldInterval = node.keys[i];
 
                     //create new intervals for the left and right part of the old interval
-                    StorageInterval newLeftInterval = new StorageInterval(oldInterval.start(), start - oldInterval.start());
-                    StorageInterval newRightInterval = new StorageInterval(newLeftInterval.start() + interval.length(), oldInterval.length() - newLeftInterval.length());
+                    Interval newLeftInterval = new Interval(oldInterval.start(), start - oldInterval.start());
+                    Interval newRightInterval = new Interval(newLeftInterval.start() + interval.length(), oldInterval.length() - newLeftInterval.length());
 
                     //store the new left interval in the node
                     node.keys[i] = newLeftInterval;
@@ -271,7 +271,7 @@ public class BtrfsFile {
                 int viewStart = node.keys[i].start() + Math.max(0, start - cumulativeLength);
                 int viewLength = Math.min(node.keys[i].length(), length - lengthRead);
 
-                view = view.plus(storage.createView(new StorageInterval(viewStart, viewLength)));
+                view = view.plus(storage.createView(new Interval(viewStart, viewLength)));
                 lengthRead += viewLength;
             }
 
@@ -343,7 +343,7 @@ public class BtrfsFile {
                 cumulativeLength += node.childLength[i];
 
                 //get the i-th key
-                StorageInterval key = node.keys[i];
+                Interval key = node.keys[i];
                 int keyStart = cumulativeLength + 1;
 
                 //if start is in the i-th key we just have to shorten the interval
@@ -353,7 +353,7 @@ public class BtrfsFile {
                     int newLength = start - (keyStart);
 
                     //update the key
-                    node.keys[i] = new StorageInterval(key.start(), newLength);
+                    node.keys[i] = new Interval(key.start(), newLength);
 
                     //update removedLength
                     removedLength += key.length() - newLength;
@@ -397,7 +397,7 @@ public class BtrfsFile {
 
                     //try to replace with rightmost key of left child
                     if (node.children[i].size >= degree) {
-                        StorageInterval removedKey = removeRightMostKey(new LinkedParentList(parent, node, i), node.children[i]);
+                        Interval removedKey = removeRightMostKey(new LinkedParentList(parent, node, i), node.children[i]);
 
                         //update childLength of current node
                         node.childLength[i] -= removedKey.length();
@@ -410,7 +410,7 @@ public class BtrfsFile {
 
                     //try to replace with leftmost key of right child
                     if (node.children[i + 1].size >= degree) {
-                        StorageInterval removedKey = removeLeftMostKey(new LinkedParentList(parent, node, i + 1), node.children[i + 1]);
+                        Interval removedKey = removeLeftMostKey(new LinkedParentList(parent, node, i + 1), node.children[i + 1]);
 
                         //update childLength of current node
                         node.childLength[i + 1] -= removedKey.length();
@@ -518,7 +518,7 @@ public class BtrfsFile {
         return length;
     }
 
-    private StorageInterval removeRightMostKey(LinkedParentList parent, BtrfsNode node) {
+    private Interval removeRightMostKey(LinkedParentList parent, BtrfsNode node) {
         //node has at least degree keys
 
         if (parent.node.size < degree) {
@@ -529,7 +529,7 @@ public class BtrfsFile {
         if (node.children[0] == null) {
 
             //get right most key
-            StorageInterval key = node.keys[node.size - 1];
+            Interval key = node.keys[node.size - 1];
 
             //remove key
             node.keys[node.size - 1] = null;
@@ -545,7 +545,7 @@ public class BtrfsFile {
 
             ensureChildSize(parent, node.children[node.size], node.size);
 
-            StorageInterval key = removeRightMostKey(parent, node.children[node.size]);
+            Interval key = removeRightMostKey(parent, node.children[node.size]);
 
             //update childLength
             node.childLength[node.size] -= key.length();
@@ -554,7 +554,7 @@ public class BtrfsFile {
         }
     }
 
-    private StorageInterval removeLeftMostKey(LinkedParentList parent, BtrfsNode node) {
+    private Interval removeLeftMostKey(LinkedParentList parent, BtrfsNode node) {
         //node has at least degree keys
 
         if (parent.node.size < degree) {
@@ -565,7 +565,7 @@ public class BtrfsFile {
         if (node.children[0] == null) {
 
             //get left most key
-            StorageInterval key = node.keys[0];
+            Interval key = node.keys[0];
 
             //move all other keys to the left
             System.arraycopy(node.keys, 1, node.keys, 0, node.size - 1);
@@ -584,7 +584,7 @@ public class BtrfsFile {
 
             ensureChildSize(parent, node.children[0], node.size);
 
-            StorageInterval key = removeLeftMostKey(parent, node.children[0]);
+            Interval key = removeLeftMostKey(parent, node.children[0]);
 
             //update childLength
             node.childLength[0] -= key.length();
@@ -709,7 +709,7 @@ public class BtrfsFile {
         BtrfsNode leftChild = parent.children[index - 1];
 
         //store and remove last key and child of left child
-        StorageInterval key = leftChild.keys[leftChild.size - 1];
+        Interval key = leftChild.keys[leftChild.size - 1];
         leftChild.keys[leftChild.size - 1] = null;
 
         BtrfsNode lastChild = leftChild.children[leftChild.size];
@@ -725,7 +725,7 @@ public class BtrfsFile {
         parent.childLength[index - 1] -= key.length() + lastChildLength;
 
         //store and replace key of parent
-        StorageInterval parentKey = parent.keys[index];
+        Interval parentKey = parent.keys[index];
         parent.keys[index] = key;
 
         //get middle child
@@ -754,7 +754,7 @@ public class BtrfsFile {
         BtrfsNode rightChild = parent.children[index + 1];
 
         //store and remove first key and child of right child
-        StorageInterval key = rightChild.keys[0];
+        Interval key = rightChild.keys[0];
         rightChild.keys[0] = null;
 
         BtrfsNode lastChild = rightChild.children[0];
@@ -770,7 +770,7 @@ public class BtrfsFile {
         parent.childLength[index + 1] -= key.length() + lastChildLength;
 
         //store and replace key of parent
-        StorageInterval parentKey = parent.keys[index];
+        Interval parentKey = parent.keys[index];
         parent.keys[index] = key;
 
         //get middle child
