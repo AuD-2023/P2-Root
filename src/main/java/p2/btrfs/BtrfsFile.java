@@ -1,7 +1,7 @@
 package p2.btrfs;
 
-import p2.storage.Storage;
 import p2.storage.Interval;
+import p2.storage.Storage;
 import p2.storage.StorageView;
 
 import java.util.List;
@@ -58,7 +58,8 @@ public class BtrfsFile {
         int previousIndex;
 
         // descend into the tree
-        outer: while (true) {
+        outer:
+        while (true) {
 
             //the length of all keys and children up to the currently considered position
             int cumulativeLength = 0;
@@ -67,7 +68,8 @@ public class BtrfsFile {
             for (int i = 0; i < node.size; i++) {
                 //before i-th child and i-th key
 
-                //if a child exists and the key should be inserted before the i-th key (start == index of i-th key -> insert before)
+                // if a child exists and the key should be inserted before the
+                // i-th key (start == index of i-th key -> insert before)
                 if (node.children[i] != null && start <= cumulativeLength + node.childLength[i] + 1) {
 
                     //update current and previous node
@@ -93,7 +95,8 @@ public class BtrfsFile {
 
                 cumulativeLength += node.childLength[i];
 
-                //if we insert it at the position of the i-th key and there is no child, move keys to the right and insert the key into the current node
+                // if we insert it at the position of the i-th key and there is no child,
+                // move keys to the right and insert the key into the current node
                 if (start == cumulativeLength + 1) {
 
                     //move keys to the right; children and childLengths are not affected because they don't exist
@@ -109,14 +112,16 @@ public class BtrfsFile {
                     return;
                 }
 
-                //if start is less than the length up to the end of the i-th key but didn't get inserted before (-> start is inside the i-th key),
-                //we have to split the key into two keys and insert the interval between them.
+                // if start is less than the length up to the end of the i-th key but didn't get
+                // inserted before (-> start is inside the i-th key),
+                // we have to split the key into two keys and insert the interval between them.
                 if (start < cumulativeLength + node.keys[i].length()) {
                     Interval oldInterval = node.keys[i];
 
                     //create new intervals for the left and right part of the old interval
                     Interval newLeftInterval = new Interval(oldInterval.start(), start - oldInterval.start());
-                    Interval newRightInterval = new Interval(newLeftInterval.start() + interval.length(), oldInterval.length() - newLeftInterval.length());
+                    Interval newRightInterval = new Interval(newLeftInterval.start() + interval.length(),
+                        oldInterval.length() - newLeftInterval.length());
 
                     //store the new left interval in the node
                     node.keys[i] = newLeftInterval;
@@ -306,7 +311,8 @@ public class BtrfsFile {
         int startIndex = 0;
 
         // descend into the tree
-        outer: while (true) {
+        outer:
+        while (true) {
 
             //iterate over all children and keys
             for (int i = startIndex; i < node.size; i++) {
@@ -565,7 +571,7 @@ public class BtrfsFile {
         if (node.children[0] == null) {
 
             //get left most key
-            Interval key = node.keys[0];
+            final Interval key = node.keys[0];
 
             //move all other keys to the left
             System.arraycopy(node.keys, 1, node.keys, 0, node.size - 1);
@@ -584,7 +590,7 @@ public class BtrfsFile {
 
             ensureChildSize(parent, node.children[0], node.size);
 
-            Interval key = removeLeftMostKey(parent, node.children[0]);
+            final Interval key = removeLeftMostKey(parent, node.children[0]);
 
             //update childLength
             node.childLength[0] -= key.length();
@@ -616,21 +622,21 @@ public class BtrfsFile {
 
             //get left and right sibling
             BtrfsNode leftSibling = index > 0 ? parentNode.children[index - 1] : null;
-            BtrfsNode rightSibling = index < parentNode.size - 1? parentNode.children[index + 1] : null;
+            BtrfsNode rightSibling = index < parentNode.size - 1 ? parentNode.children[index + 1] : null;
 
             //rotate a key from left or right child if possible
             if (leftSibling != null && leftSibling.size >= degree) {
                 rotateFromLeftChild(parentNode, index);
             } else if (rightSibling != null && rightSibling.size >= degree) {
                 rotateFromRightChild(parentNode, index);
-            } else {//if we can't rotate, merge with left or right child
+            } else { // if we can't rotate, merge with left or right child
 
-                //ensure that the parent has at least degree keys before merging
+                // ensure that the parent has at least degree keys before merging
                 if (parentNode.size < degree) {
 
-                    //the root does not have to have at least degree keys
+                    // the root does not have to have at least degree keys
                     if (parentNode != root) {
-                        //recursively fix size of parent
+                        // recursively fix size of parent
                         ensureChildSize(parent.parent, parentNode, parent.index);
                     }
                 }
@@ -673,7 +679,7 @@ public class BtrfsFile {
 
         //update size of parent and middle child
         parent.size--;
-        middleChild.size += 2*degree - 1;
+        middleChild.size += 2 * degree - 1;
     }
 
     private void mergeWithRightChild(BtrfsNode parent, int index) {
@@ -700,7 +706,7 @@ public class BtrfsFile {
 
         //update size of parent and middle child
         parent.size--;
-        middleChild.size += 2*degree - 1;
+        middleChild.size += 2 * degree - 1;
     }
 
     private void rotateFromLeftChild(BtrfsNode parent, int index) {
@@ -709,23 +715,23 @@ public class BtrfsFile {
         BtrfsNode leftChild = parent.children[index - 1];
 
         //store and remove last key and child of left child
-        Interval key = leftChild.keys[leftChild.size - 1];
+        final Interval key = leftChild.keys[leftChild.size - 1];
         leftChild.keys[leftChild.size - 1] = null;
 
-        BtrfsNode lastChild = leftChild.children[leftChild.size];
+        final BtrfsNode lastChild = leftChild.children[leftChild.size];
         leftChild.children[leftChild.size] = null;
 
-        int lastChildLength = leftChild.childLength[leftChild.size];
+        final int lastChildLength = leftChild.childLength[leftChild.size];
         leftChild.childLength[leftChild.size] = 0;
 
-        //update size of left child
+        // update size of left child
         leftChild.size--;
 
-        //update childLength of parent (childLength of the parent of the parent doesn't change)
+        // update childLength of parent (childLength of the parent of the parent doesn't change)
         parent.childLength[index - 1] -= key.length() + lastChildLength;
 
         //store and replace key of parent
-        Interval parentKey = parent.keys[index];
+        final Interval parentKey = parent.keys[index];
         parent.keys[index] = key;
 
         //get middle child
@@ -751,13 +757,13 @@ public class BtrfsFile {
     private void rotateFromRightChild(BtrfsNode parent, int index) {
 
         //get right child
-        BtrfsNode rightChild = parent.children[index + 1];
+        final BtrfsNode rightChild = parent.children[index + 1];
 
         //store and remove first key and child of right child
-        Interval key = rightChild.keys[0];
+        final Interval key = rightChild.keys[0];
         rightChild.keys[0] = null;
 
-        BtrfsNode lastChild = rightChild.children[0];
+        final BtrfsNode lastChild = rightChild.children[0];
         rightChild.children[0] = null;
 
         int lastChildLength = rightChild.childLength[0];

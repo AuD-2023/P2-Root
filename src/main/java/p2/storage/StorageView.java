@@ -18,6 +18,9 @@ import java.util.stream.Stream;
 public interface StorageView {
 
     StorageView EMPTY = new StorageView() {
+
+        private final StorageInterval[] intervals = new StorageInterval[0];
+
         @Override
         public int length() {
             return 0;
@@ -25,7 +28,7 @@ public interface StorageView {
 
         @Override
         public StorageInterval[] getIntervals() {
-            return new StorageInterval[0];
+            return intervals;
         }
 
         @Override
@@ -67,7 +70,7 @@ public interface StorageView {
      */
     static StorageView concat(StorageView... views) {
         return switch (views.length) {
-            case 0 -> EmptyStorageView.INSTANCE;
+            case 0 -> StorageView.EMPTY;
             case 1 -> views[0];
             default -> {
                 final StorageInterval[] intervals = Stream.of(views)

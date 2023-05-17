@@ -10,8 +10,8 @@ public class BtrfsNode {
     public int[] childLength;
 
     public BtrfsNode(int degree) {
-        keys = new Interval[2*degree - 1];
-        children = new BtrfsNode[2*degree];
-        childLength = new int[2*degree];
+        keys = new Interval[2 * degree - 1];
+        children = new BtrfsNode[2 * degree];
+        childLength = new int[2 * degree];
     }
 }
