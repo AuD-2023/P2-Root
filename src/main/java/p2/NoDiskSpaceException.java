@@ -1,4 +1,4 @@
 package p2;
 
-public class NoDiskSpaceException {
+public class NoDiskSpaceException extends RuntimeException {
 }

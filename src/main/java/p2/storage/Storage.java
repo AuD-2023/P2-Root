@@ -1,7 +1,5 @@
 package p2.storage;
 
-import p2.AllocationStrategy;
-
 public interface Storage {
 
     StorageView createView(Interval... intervals);
@@ -10,5 +8,5 @@ public interface Storage {
 
     void read(int storagePos, byte[] dest, int destPos, int length);
 
-    AllocationStrategy getAllocationStrategy();
+    int getSize();
 }
