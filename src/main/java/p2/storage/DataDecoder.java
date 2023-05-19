@@ -2,6 +2,10 @@ package p2.storage;
 
 public interface DataDecoder<T> {
 
-    T decode(StorageView data);
+    default T decode(StorageView data) {
+        return decode(data.getData());
+    }
+
+    T decode(byte[] data);
 
 }

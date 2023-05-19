@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 public class StringDecoder implements DataDecoder<String> {
 
     @Override
-    public String decode(StorageView data) {
-        return new String(data.getData(), StandardCharsets.UTF_8);
+    public String decode(byte[] data) {
+        return new String(data, StandardCharsets.UTF_8);
     }
 }

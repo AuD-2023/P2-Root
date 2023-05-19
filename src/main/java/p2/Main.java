@@ -19,7 +19,11 @@ public class Main {
 
         FileSystem fileSystem = new FileSystem(AllocationStrategy.NEXT_FIT, 200);
 
-        BtrfsFile file = fileSystem.createFile("Helo World!", new StringEncoder());
+        BtrfsFile file = fileSystem.createFile("Helo", new StringEncoder());
+
+        System.out.println(fileSystem.readFile(file, new StringDecoder())); // Helo!
+
+        fileSystem.insertIntoFile(file, 4, " World!", new StringEncoder());
 
         System.out.println(fileSystem.readFile(file, new StringDecoder())); // Helo World!
 

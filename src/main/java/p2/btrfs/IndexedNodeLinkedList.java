@@ -1,10 +1,10 @@
 package p2.btrfs;
 
-class IndexedNodeLinkedList {
+public class IndexedNodeLinkedList {
 
-    IndexedNodeLinkedList parent;
-    BtrfsNode node;
-    int index;
+    public IndexedNodeLinkedList parent;
+    public BtrfsNode node;
+    public int index;
 
     public IndexedNodeLinkedList(IndexedNodeLinkedList parent, BtrfsNode node, int index) {
         this.parent = parent;

@@ -121,18 +121,7 @@ public class BtrfsFile {
         // if we had to split the key, we have to insert it into the leaf node
         if (indexedNode.node.isLeaf() && splitKey != null) {
 
-            // split if necessary
-            if (indexedNode.node.isFull()) {
-                BtrfsNode previousNode = indexedNode.node;
-
-                split(indexedNode);
-
-                if (previousNode != indexedNode.node) {
-                    indexedNode.parent.node.childLengths[indexedNode.parent.index - 1] -= insertionSize;
-                    indexedNode.parent.node.childLengths[indexedNode.parent.index] += insertionSize;
-                }
-            }
-
+            // we already split before going into child -> current node is not full
             System.arraycopy(indexedNode.node.keys, indexedNode.index, indexedNode.node.keys, indexedNode.index + 1, indexedNode.node.size - indexedNode.index);
             indexedNode.node.keys[indexedNode.index] = splitKey;
             indexedNode.node.size++;
@@ -140,25 +129,31 @@ public class BtrfsFile {
             return indexedNode;
         }
 
-        for (int i = indexedNode.index; i < indexedNode.node.size; i++, indexedNode.index++) {
+        for (; indexedNode.index < indexedNode.node.size; indexedNode.index++) {
 
-            if (!indexedNode.node.isLeaf() && start <= cumulativeLength + indexedNode.node.childLengths[i]) {
+            if (!indexedNode.node.isLeaf() && start <= cumulativeLength + indexedNode.node.childLengths[indexedNode.index]) {
 
-                indexedNode.node.childLengths[i] += insertionSize;
+                // split if child is full
+                if (indexedNode.node.children[indexedNode.index].isFull()) {
+                    split(new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.index], 0));
+                }
 
-                return findInsertionPosition(new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[i], 0), start, cumulativeLength, insertionSize, splitKey);
+                indexedNode.node.childLengths[indexedNode.index] += insertionSize;
+
+                return findInsertionPosition(new IndexedNodeLinkedList(indexedNode,
+                    indexedNode.node.children[indexedNode.index], 0), start, cumulativeLength, insertionSize, splitKey);
             }
 
-            cumulativeLength += indexedNode.node.childLengths[i];
+            cumulativeLength += indexedNode.node.childLengths[indexedNode.index];
 
             if (start == cumulativeLength) {
                 return indexedNode;
             }
 
             // if we insert it in the middle of the key -> split the key
-            if (start < cumulativeLength + indexedNode.node.keys[i].length()) {
+            if (start < cumulativeLength + indexedNode.node.keys[indexedNode.index].length()) {
 
-                Interval oldInterval = indexedNode.node.keys[i];
+                Interval oldInterval = indexedNode.node.keys[indexedNode.index];
 
                 // create new intervals for the left and right part of the old interval
                 Interval newLeftInterval = new Interval(oldInterval.start(), (cumulativeLength + oldInterval.length()) - start);
@@ -166,7 +161,7 @@ public class BtrfsFile {
                     oldInterval.length() - newLeftInterval.length());
 
                 // store the new left interval in the node
-                indexedNode.node.keys[i] = newLeftInterval;
+                indexedNode.node.keys[indexedNode.index] = newLeftInterval;
 
                 insertionSize += newRightInterval.length();
                 splitKey = newRightInterval;
@@ -177,7 +172,11 @@ public class BtrfsFile {
                 }
             }
 
-            cumulativeLength += indexedNode.node.keys[i].length();
+            cumulativeLength += indexedNode.node.keys[indexedNode.index].length();
+        }
+
+        if (indexedNode.node.isLeaf()) {
+            return indexedNode;
         }
 
         indexedNode.node.childLengths[indexedNode.node.size] += insertionSize;
