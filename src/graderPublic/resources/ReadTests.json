@@ -1,0 +1,8 @@
+{
+  "readNoChild": [
+    {
+      "tree": [["AB", "C", "DEF", "G"], "HIJK", ["LM", "NO", "PQ"]],
+      "degree": 3
+    }
+  ]
+}

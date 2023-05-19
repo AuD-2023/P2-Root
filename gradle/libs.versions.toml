@@ -6,6 +6,7 @@ annotations = "org.jetbrains:annotations:23.0.0"
 algoutils-student = { module = "org.tudalgo:algoutils-student", version.ref = "algoutils" }
 algoutils-tutor = { module = "org.tudalgo:algoutils-tutor", version.ref = "algoutils" }
 junit-core = { module = "org.junit.jupiter:junit-jupiter", version = "5.9.1" }
+junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version = "2.0.0" }
 
 [plugins]
 style = { id = "org.sourcegrade.style", version = "2.1.0" }

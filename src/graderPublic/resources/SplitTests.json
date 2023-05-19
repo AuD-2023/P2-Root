@@ -1,0 +1,362 @@
+{
+  "testSimpleSplit": [
+    {
+      "tree": [
+        [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "F",
+        [
+          "G",
+          "H",
+          "I",
+          "J",
+          "K"
+        ]
+      ],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 1,
+      "expected": [
+        [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "F",
+        [
+          "G",
+          "H"
+        ],
+        "I",
+        [
+          "J",
+          "K"
+        ]
+      ]
+    },
+    {
+      "tree": [
+        [
+          [
+            "A", "B"
+          ],
+          "C",
+          [
+            "D", "E"
+          ],
+          "F",
+          [
+            "G", "H"
+          ],
+          "I",
+          [
+            "J", "K"
+          ],
+          "L",
+          [
+            "M", "N"
+          ],
+          "O",
+          [
+            "P", "Q"
+          ]
+        ],
+        "R",
+        [
+          [
+            "S", "T"
+          ],
+          "U",
+          [
+            "V", "W"
+          ],
+          "X",
+          [
+            "Y", "Z"
+          ],
+          "a",
+          [
+            "b", "c"
+          ],
+          "d",
+          [
+            "e", "f"
+          ],
+          "g",
+          [
+            "h", "i"
+          ]
+        ]
+      ],
+      "degree": 3,
+      "parentIndex": 0,
+      "childIndex": 1,
+      "expected": [
+        [
+          [
+            "A", "B"
+          ],
+          "C",
+          [
+            "D", "E"
+          ],
+          "F",
+          [
+            "G", "H"
+          ]
+        ],
+        "I",
+        [
+          [
+            "J", "K"
+          ],
+          "L",
+          [
+            "M", "N"
+          ],
+          "O",
+          [
+            "P", "Q"
+          ]
+        ],
+        "R",
+        [
+          [
+            "S", "T"
+          ],
+          "U",
+          [
+            "V", "W"
+          ],
+          "X",
+          [
+            "Y", "Z"
+          ],
+          "a",
+          [
+            "b", "c"
+          ],
+          "d",
+          [
+            "e", "f"
+          ],
+          "g",
+          [
+            "h", "i"
+          ]
+        ]
+      ]
+    }
+  ],
+  "testIndexedNodeLinkedList": [
+    {
+      "tree": [
+        [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "F",
+        [
+          "G",
+          "H",
+          "I",
+          "J",
+          "K"
+        ]
+      ],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 0,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 0
+    },
+    {
+      "tree": [
+        [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "F",
+        [
+          "G",
+          "H",
+          "I",
+          "J",
+          "K"
+        ]
+      ],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 1,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 1
+    },
+    {
+      "tree": [
+        [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "F",
+        [
+          "G",
+          "H",
+          "I",
+          "J",
+          "K"
+        ]
+      ],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 2,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 2
+    },
+    {
+      "tree": [
+        [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "F",
+        [
+          "G",
+          "H",
+          "I",
+          "J",
+          "K"
+        ]
+      ],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 3,
+      "expectedParentIndex": 2,
+      "expectedChildIndex": 0
+    },
+    {
+      "tree": [
+        [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "F",
+        [
+          "G",
+          "H",
+          "I",
+          "J",
+          "K"
+        ]
+      ],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 4,
+      "expectedParentIndex": 2,
+      "expectedChildIndex": 1
+    },
+    {
+      "tree": [
+        [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "F",
+        [
+          "G",
+          "H",
+          "I",
+          "J",
+          "K"
+        ]
+      ],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 5,
+      "expectedParentIndex": 2,
+      "expectedChildIndex": 2
+    }
+  ],
+  "testSplitRoot": [
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "index": 0,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 0,
+      "expected": [["A", "B"], "C", ["D", "E"]]
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "index": 1,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 1,
+      "expected": [["A", "B"], "C", ["D", "E"]]
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "index": 2,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 2,
+      "expected": [["A", "B"], "C", ["D", "E"]]
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "index": 3,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 0,
+      "expected": [["A", "B"], "C", ["D", "E"]]
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "index": 4,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 1,
+      "expected": [["A", "B"], "C", ["D", "E"]]
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "index": 5,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 2,
+      "expected": [["A", "B"], "C", ["D", "E"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K"], "L", ["MN", "OP"], "Q", ["R", "S"]],
+      "degree": 3,
+      "index": 0,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 0,
+      "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H"]], "I", [["J", "K"], "L", ["MN", "OP"], "Q", ["R", "S"]]]
+    }
+  ]
+}
