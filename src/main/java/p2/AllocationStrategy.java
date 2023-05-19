@@ -1,6 +1,5 @@
 package p2;
 
-import p2.storage.FileSystem;
 import p2.storage.Interval;
 
 import java.util.List;
@@ -11,9 +10,11 @@ public interface AllocationStrategy {
 
     List<Interval> allocate(int size);
 
+    void setMaxIntervalSize(int size);
+
     interface Factory {
 
-        AllocationStrategy create(FileSystem disk);
+        AllocationStrategy create(boolean[] used);
 
     }
 

@@ -17,17 +17,30 @@ public class Main {
      */
     public static void main(String[] args) {
 
-        FileSystem fileSystem = new FileSystem(AllocationStrategy.NEXT_FIT, 100);
+        FileSystem fileSystem = new FileSystem(AllocationStrategy.NEXT_FIT, 200);
 
         BtrfsFile file = fileSystem.createFile("Helo World!", new StringEncoder());
 
+        System.out.println(fileSystem.readFile(file, new StringDecoder())); // Helo World!
+
         fileSystem.insertIntoFile(file, 3, "l", new StringEncoder());
 
-        System.out.println(fileSystem.readFile(file, new StringDecoder()));
+        System.out.println(fileSystem.readFile(file, new StringDecoder())); // Hello World!
 
-        fileSystem.insertIntoFile(file, 6, "beautiful ", new StringEncoder());
+        fileSystem.insertIntoFile(file, 6, "beautiful and very very very nice and wonderful and i dont know what else ", new StringEncoder());
 
-        System.out.println(fileSystem.readFile(file, new StringDecoder(), 1, file.getSize() - 1));
+        System.out.println(fileSystem.readFile(file, new StringDecoder(), 0, file.getSize())); // Hello beautiful and very very very nice and wonderful and i dont know what else World!
 
+        fileSystem.removeFromFile(file, 6, 14);
+
+        System.out.println(fileSystem.readFile(file, new StringDecoder())); // Hello very very very nice and wonderful and i dont know what else World
+
+        fileSystem.removeFromFile(file, 6, 60);
+
+        System.out.println(fileSystem.readFile(file, new StringDecoder())); // Hello World!
+
+        fileSystem.removeFromFile(file, 0, file.getSize());
+
+        System.out.println(fileSystem.readFile(file, new StringDecoder())); // <empty>
     }
 }

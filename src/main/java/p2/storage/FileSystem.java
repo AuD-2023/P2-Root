@@ -11,11 +11,15 @@ public class FileSystem {
     private final Storage storage;
     private final List<BtrfsFile> files = new ArrayList<>();
 
+    private final boolean[] used;
+
     AllocationStrategy allocator;
 
     public FileSystem(AllocationStrategy.Factory factory, int size) {
         storage = new ArrayStorage(size);
-        this.allocator = factory.create(this);
+        used = new boolean[size];
+        this.allocator = factory.create(used);
+        allocator.setMaxIntervalSize(2); //for easier testing; can be removed
     }
 
     public <T> BtrfsFile createFile(T data, DataEncoder<T> encoder) {
@@ -46,13 +50,21 @@ public class FileSystem {
         return decoder.decode(data);
     }
 
-    public <T> T readFile(BtrfsFile file, DataDecoder<T> decoder, int start, int end) {
+    public <T> T readFile(BtrfsFile file, DataDecoder<T> decoder, int start, int length) {
         if (!files.contains(file)) {
             throw new IllegalArgumentException("File not part of this fileSystem");
         }
 
-        StorageView data = file.read(start, end);
+        StorageView data = file.read(start, length);
         return decoder.decode(data);
+    }
+
+    public void removeFromFile(BtrfsFile file, int start, int length) {
+        if (!files.contains(file)) {
+            throw new IllegalArgumentException("File not part of this fileSystem");
+        }
+
+        file.remove(start, length);
     }
 
     public int getSize() {

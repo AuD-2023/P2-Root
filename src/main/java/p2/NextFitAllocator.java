@@ -1,6 +1,5 @@
 package p2;
 
-import p2.storage.FileSystem;
 import p2.storage.Interval;
 
 import java.util.LinkedList;
@@ -11,9 +10,15 @@ public class NextFitAllocator implements AllocationStrategy {
     private final boolean[] used;
 
     private int lastFit = -1;
+    private int maxIntervalSize = Integer.MAX_VALUE;
 
-    public NextFitAllocator(FileSystem fileSystem) {
-        used = new boolean[fileSystem.getSize()];
+    public NextFitAllocator(boolean[] used) {
+        this.used = used;
+    }
+
+    @Override
+    public void setMaxIntervalSize(int size) {
+        maxIntervalSize = size;
     }
 
     @Override
@@ -50,7 +55,7 @@ public class NextFitAllocator implements AllocationStrategy {
                     break outer;
                 }
 
-                if (end - start + 1 == 2) { //TODO remove; just for testing
+                if (end - start + 1 == maxIntervalSize) {
                     break;
                 }
 
