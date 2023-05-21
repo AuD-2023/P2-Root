@@ -69,6 +69,11 @@ public class BtrfsFile {
 
         int insertionSize = data.length;
 
+        // findInsertionIndex assumes that the current node is not full
+        if (root.isFull()) {
+            split(new IndexedNodeLinkedList(null, root, 0));
+        }
+
         insert(intervals, findInsertionPosition(new IndexedNodeLinkedList(
             null, root, 0), start, 0, insertionSize, null), insertionSize);
 
@@ -136,6 +141,10 @@ public class BtrfsFile {
                 // split if child is full
                 if (indexedNode.node.children[indexedNode.index].isFull()) {
                     split(new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.index], 0));
+
+                    // check again where we should insert
+                    indexedNode.index--;
+                    continue;
                 }
 
                 indexedNode.node.childLengths[indexedNode.index] += insertionSize;
@@ -531,7 +540,7 @@ public class BtrfsFile {
                         ensureSize(indexedNode);
 
                         // merge the two children
-                        mergeWithRightChild(new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.index], 0));
+                        mergeWithRightSibling(new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.index], 0));
 
                         // remove the key from the merged node
                         int removedInChild = remove(start, length, new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.index], degree - 1), cumulativeLength, removedLength);
@@ -664,25 +673,18 @@ public class BtrfsFile {
 
         // rotate a key from left or right node if possible
         if (leftSibling != null && leftSibling.size >= degree) {
-            rotateFromLeftChild(indexedNode);
+            rotateFromLeftSibling(indexedNode);
         } else if (rightSibling != null && rightSibling.size >= degree) {
-            rotateFromRightChild(indexedNode);
+            rotateFromRightSibling(indexedNode);
         } else { // if we can't rotate, merge with left or right node
 
-            // ensure that the parent has at least degree keys before merging
-            if (parentNode.size < degree) {
-
-                // the root does not have to have at least degree keys
-                if (parentNode != root) {
-                    // recursively fix size of parent
-                    ensureSize(indexedNode.parent);
-                }
-            }
+            // recursively fix size of parent
+            ensureSize(indexedNode.parent);
 
             if (parentIndex > 0) {
-                mergeWithLeftChild(indexedNode);
+                mergeWithLeftSibling(indexedNode);
             } else {
-                mergeWithRightChild(indexedNode);
+                mergeWithRightSibling(indexedNode);
             }
 
             // if the root has no keys left after merging, set the only node as the new root
@@ -692,7 +694,7 @@ public class BtrfsFile {
         }
     }
 
-    private void mergeWithLeftChild(IndexedNodeLinkedList indexedNode) {
+    private void mergeWithLeftSibling(IndexedNodeLinkedList indexedNode) {
 
         BtrfsNode parentNode = indexedNode.parent.node;
         int parentIndex = indexedNode.parent.index;
@@ -736,7 +738,7 @@ public class BtrfsFile {
         indexedNode.index += degree;
     }
 
-    private void mergeWithRightChild(IndexedNodeLinkedList indexedNode) {
+    private void mergeWithRightSibling(IndexedNodeLinkedList indexedNode) {
 
         BtrfsNode parentNode = indexedNode.parent.node;
         int parentIndex = indexedNode.parent.index;
@@ -769,7 +771,7 @@ public class BtrfsFile {
         middleChild.size = 2 * degree - 1;
     }
 
-    private void rotateFromLeftChild(IndexedNodeLinkedList indexedNode) {
+    private void rotateFromLeftSibling(IndexedNodeLinkedList indexedNode) {
 
         BtrfsNode parentNode = indexedNode.parent.node;
         int parentIndex = indexedNode.parent.index;
@@ -820,7 +822,7 @@ public class BtrfsFile {
         indexedNode.index++;
     }
 
-    private void rotateFromRightChild(IndexedNodeLinkedList indexedNode) {
+    private void rotateFromRightSibling(IndexedNodeLinkedList indexedNode) {
 
         BtrfsNode parentNode = indexedNode.parent.node;
         int parentIndex = indexedNode.parent.index;

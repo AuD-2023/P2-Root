@@ -351,12 +351,47 @@
       "expected": [["A", "B"], "C", ["D", "E"]]
     },
     {
-      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K"], "L", ["MN", "OP"], "Q", ["R", "S"]],
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K"], "L", ["M", "N"], "O", ["P", "Q"]],
       "degree": 3,
       "index": 0,
       "expectedParentIndex": 0,
       "expectedChildIndex": 0,
-      "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H"]], "I", [["J", "K"], "L", ["MN", "OP"], "Q", ["R", "S"]]]
+      "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H"]], "I", [["J", "K"], "L", ["M", "N"], "O", ["P", "Q"]]]
+    }
+  ],
+  "testSplitRecursive": [
+    {
+      "tree": [["A", "B", "C", "D", "E"],"F", ["G", "H"], "I", ["J", "K"], "L", ["M", "N"], "O", ["P", "Q"], "R", ["S", "T"]],
+      "degree": 3,
+      "index": 0,
+      "parentIndex": 0,
+      "childIndex": 0,
+      "expectedGrandParentIndex": 0,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 0,
+      "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K"]], "L", [["M", "N"], "O", ["P", "Q"], "R", ["S", "T"]]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K", "L", "M", "N"], "O", ["P", "Q"], "R", ["S", "T"]],
+      "degree": 3,
+      "index": 0,
+      "parentIndex": 3,
+      "childIndex":2,
+      "expectedGrandParentIndex": 1,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 2,
+      "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H"]], "I", [["J", "K"], "L", ["M", "N"], "O", ["P", "Q"], "R", ["S", "T"]]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K"], "L", ["M", "N", "O", "P", "Q"], "R", ["S", "T"]],
+      "degree": 3,
+      "index": 0,
+      "parentIndex": 4,
+      "childIndex": 4,
+      "expectedGrandParentIndex": 1,
+      "expectedParentIndex": 2,
+      "expectedChildIndex": 1,
+      "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H"]], "I", [["J", "K"], "L", ["M", "N"], "O", ["P", "Q"], "R", ["S", "T"]]]
     }
   ]
 }

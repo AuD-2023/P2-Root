@@ -3,6 +3,7 @@ package p2;
 import org.tudalgo.algoutils.tutor.general.assertions.Context;
 import p2.btrfs.BtrfsFile;
 import p2.btrfs.BtrfsNode;
+import p2.btrfs.IndexedNodeLinkedList;
 import p2.storage.FileSystem;
 import p2.storage.Interval;
 import p2.storage.Storage;
@@ -15,9 +16,43 @@ import java.util.List;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertEquals;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertNotNull;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertNull;
+import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertSame;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertTrue;
 
 public class TreeUtil {
+
+
+    public static void assertIndexedNodeLinkedListEquals(Context context,
+                                                         IndexedNodeLinkedList expected,
+                                                         IndexedNodeLinkedList actual,
+                                                         Storage storage) {
+        assertIndexedNodeLinkedListEquals(context, expected, actual, storage, 0);
+    }
+
+    private static void assertIndexedNodeLinkedListEquals(Context context,
+                                                         IndexedNodeLinkedList expected,
+                                                         IndexedNodeLinkedList actual,
+                                                         Storage storage,
+                                                         int height) {
+
+        assertSame(expected.node, actual.node, context,
+            TR -> "The node of the IndexedNodeLinkedList at height %d is not correct. Expected Node: %s but was: %s"
+                .formatted(height, treeToString(expected.node, storage), treeToString(actual.node, storage)));
+
+        assertEquals(expected.index, actual.index, context,
+            TR -> "The index of the IndexedNodeLinkedList at height %d is not correct. Expected Index: %s but was: %s"
+                .formatted(height, expected.index, actual.index));
+
+        if (expected.parent == null) {
+            assertNull(actual.parent, context,
+                TR -> ("The parent of the IndexedNodeLinkedList at height %d is not correct. " +
+                    "Expected the parent to be null but it was: %s")
+                    .formatted(height, treeToString(actual.parent.node, storage)));
+            return;
+        }
+
+        assertIndexedNodeLinkedListEquals(context, expected.parent, actual.parent, storage, height + 1);
+    }
 
     public static void assertTreeEquals(Context context, String message, BtrfsNode expectedNode, BtrfsNode actualNode,
                                         Storage expectedStorage, Storage actualStorage) {

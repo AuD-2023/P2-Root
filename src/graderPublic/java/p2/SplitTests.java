@@ -19,6 +19,7 @@ import static p2.TreeUtil.getRoot;
 import static p2.TreeUtil.treeToString;
 import static p2.TreeUtil.FileAndStorage;
 
+@SuppressWarnings("DuplicatedCode")
 public class SplitTests {
 
     @ParameterizedTest
@@ -30,6 +31,7 @@ public class SplitTests {
                                  @Property("expected") List<Object> expected) throws NoSuchFieldException, IllegalAccessException {
 
         Context.Builder<?> context = contextBuilder()
+            .subject("BtrfsFile.split()")
             .add("original Tree", treeToString(tree))
             .add("degree", degree)
             .add("parentIndex", parentIndex)
@@ -68,6 +70,7 @@ public class SplitTests {
                                           @Property("expectedChildIndex") int expectedChildIndex) throws NoSuchFieldException, IllegalAccessException {
 
         Context.Builder<?> context = contextBuilder()
+            .subject("BtrfsFile.split()")
             .add("original Tree", treeToString(tree))
             .add("degree", degree)
             .add("parentIndex", parentIndex)
@@ -107,6 +110,7 @@ public class SplitTests {
                               @Property("expected") List<Object> expected) throws NoSuchFieldException, IllegalAccessException {
 
         Context.Builder<?> context = contextBuilder()
+            .subject("BtrfsFile.split()")
             .add("original Tree", treeToString(tree))
             .add("degree", degree)
             .add("index", index)
@@ -138,6 +142,62 @@ public class SplitTests {
         assertEquals(getRoot(actualTree).children[expectedParentIndex], indexedRoot.node, context.build(),
             TR -> "indexedNode.node is not equal to root.children[parentIndex].");
         assertEquals(expectedChildIndex, indexedRoot.index, context.build(),
+            TR -> "indexedNode.index is not correct.");
+    }
+
+    @ParameterizedTest
+    @JsonClasspathSource(value = "SplitTests.json", data = "testSplitRecursive")
+    public void testSplitRecursive(@Property("tree") List<Object> tree,
+                                    @Property("degree") int degree,
+                                    @Property("parentIndex") int parentIndex,
+                                    @Property("childIndex") int childIndex,
+                                    @Property("expectedGrandParentIndex") int expectedGrandParentIndex,
+                                    @Property("expectedParentIndex") int expectedParentIndex,
+                                    @Property("expectedChildIndex") int expectedChildIndex,
+                                   @Property("expected") List<Object> expected) throws NoSuchFieldException, IllegalAccessException {
+
+        Context.Builder<?> context = contextBuilder()
+            .subject("BtrfsFile.split()")
+            .add("original Tree", treeToString(tree))
+            .add("degree", degree)
+            .add("parentIndex", parentIndex)
+            .add("childIndex", childIndex)
+            .add("expectedGrandParentIndex", expectedParentIndex)
+            .add("expectedParentIndex", expectedParentIndex)
+            .add("expectedChildIndex", expectedChildIndex)
+            .add("expected tree", treeToString(expected));
+
+        FileAndStorage expectedFileAndStorage = constructTree(expected, degree);
+        BtrfsFile expectedTree = expectedFileAndStorage.file();
+
+        FileAndStorage actualFileAndStorage = constructTree(tree, degree);
+        BtrfsFile actualTree = actualFileAndStorage.file();
+        BtrfsNode root = getRoot(actualTree);
+        BtrfsNode child = root.children[parentIndex];
+
+        IndexedNodeLinkedList indexedRoot = new IndexedNodeLinkedList(null, root, parentIndex);
+        IndexedNodeLinkedList indexedChild = new IndexedNodeLinkedList(indexedRoot, child, childIndex);
+
+        call(() -> actualTree.split(indexedChild), context.build(), TR -> "split() should not throw an exception");
+
+        context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
+
+        assertTreeEquals(context.build(), "The tree is not correct.",
+            getRoot(expectedTree), getRoot(actualTree), expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+
+        assertEquals(expectedTree.getSize(), actualTree.getSize(), context.build(), TR -> "The size should not change.");
+
+        assertEquals(getRoot(actualTree), indexedChild.parent.parent.node, context.build(),
+            TR -> "indexedNode.parent.parent.node should be equal to the root attribute of the tree.");
+        assertEquals(expectedGrandParentIndex, indexedChild.parent.parent.index, context.build(),
+            TR -> "indexedNode.parent.parent.index is not correct.");
+        assertEquals(getRoot(actualTree).children[expectedGrandParentIndex], indexedChild.parent.node, context.build(),
+            TR -> "indexedNode.parent.node is not equal to root.children[indexedNode.parent.parent.index].");
+        assertEquals(expectedParentIndex, indexedChild.parent.index, context.build(),
+            TR -> "indexedNode.parent.index is not correct.");
+        assertEquals(getRoot(actualTree).children[expectedGrandParentIndex].children[expectedParentIndex], indexedChild.node, context.build(),
+            TR -> "indexedNode.node is not equal to root.children[indexedNode.parent.parent.index].children[indexedNode.parent.index].");
+        assertEquals(expectedParentIndex, indexedChild.parent.index, context.build(),
             TR -> "indexedNode.index is not correct.");
     }
 }
