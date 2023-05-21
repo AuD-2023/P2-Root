@@ -93,7 +93,6 @@ public class FindInsertionPositionTests {
         FileAndStorage expectedFileAndStorage = constructTree(expected, degree);
         BtrfsFile expectedTree = expectedFileAndStorage.file();
 
-
         IndexedNodeLinkedList actualIndexedNode = callFindInsertionPosition(
             actualTree, new IndexedNodeLinkedList(null, getRoot(actualTree), 0), start, insertionSize);
 

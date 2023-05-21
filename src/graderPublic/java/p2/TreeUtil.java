@@ -120,6 +120,8 @@ public class TreeUtil {
 
             if (node.keys[i] != null) {
                 builder.append("\"").append(keyToString(storage, node.keys[i])).append("\"");
+            } else {
+                builder.append("<null>");
             }
 
             if (i < node.size - 1) {
