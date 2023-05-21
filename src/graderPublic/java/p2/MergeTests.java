@@ -19,59 +19,56 @@ import static p2.TreeUtil.constructTree;
 import static p2.TreeUtil.getRoot;
 import static p2.TreeUtil.treeToString;
 
-public class RotateTests {
+@SuppressWarnings("DuplicatedCode")
+public class MergeTests {
 
     @ParameterizedTest
-    @JsonClasspathSource(value = "rotateTests.json", data = "testRotateRight")
-    public void testRotateRightOriginalNode(@Property("tree") List<Object> tree,
-                                            @Property("degree") int degree,
-                                            @Property("parentIndex") int parentIndex,
-                                            @Property("childIndex") int childIndex,
-                                            @Property("expected") List<Object> expected) throws Throwable {
+    @JsonClasspathSource(value = "mergeTests.json", data = "testMergeRight")
+    public void testMergeRightOriginalNode(@Property("tree") List<Object> tree,
+                                           @Property("degree") int degree,
+                                           @Property("parentIndex") int parentIndex,
+                                           @Property("childIndex") int childIndex,
+                                           @Property("expected") List<Object> expected) throws Throwable {
 
-        testRotate(tree, degree, parentIndex, childIndex, expected, file -> getRoot(file).children[parentIndex], true);
+        testMerge(tree, degree, parentIndex, childIndex, parentIndex, childIndex, expected,
+            file -> getRoot(file).children[parentIndex], true);
     }
 
     @ParameterizedTest
-    @JsonClasspathSource(value = "rotateTests.json", data = "testRotateRight")
-    public void testRotateRightRightNode(@Property("tree") List<Object> tree,
+    @JsonClasspathSource(value = "mergeTests.json", data = "testMergeRight")
+    public void testMergeRightParentNode(@Property("tree") List<Object> tree,
                                          @Property("degree") int degree,
                                          @Property("parentIndex") int parentIndex,
                                          @Property("childIndex") int childIndex,
                                          @Property("expected") List<Object> expected) throws Throwable {
 
-        testRotate(tree, degree, parentIndex, childIndex, expected, file -> getRoot(file).children[parentIndex + 1], true);
+        testMerge(tree, degree, parentIndex, childIndex, parentIndex, childIndex, expected,
+            TreeUtil::getRoot, true);
     }
 
     @ParameterizedTest
-    @JsonClasspathSource(value = "rotateTests.json", data = "testRotateRight")
-    public void testRotateRightParentNode(@Property("tree") List<Object> tree,
-                                          @Property("degree") int degree,
-                                          @Property("parentIndex") int parentIndex,
-                                          @Property("childIndex") int childIndex,
-                                          @Property("expected") List<Object> expected) throws Throwable {
+    @JsonClasspathSource(value = "mergeTests.json", data = "testMergeLeft")
+    public void testMergeLeftParentNode(@Property("tree") List<Object> tree,
+                                        @Property("degree") int degree,
+                                        @Property("parentIndex") int parentIndex,
+                                        @Property("childIndex") int childIndex,
+                                        @Property("expectedParentIndex") int expectedParentIndex,
+                                        @Property("expectedChildIndex") int expectedChildIndex,
+                                        @Property("expected") List<Object> expected) throws Throwable {
 
-        testRotate(tree, degree, parentIndex, childIndex, expected, TreeUtil::getRoot, true);
+        testMerge(tree, degree, parentIndex, childIndex, expectedParentIndex, expectedChildIndex, expected,
+            TreeUtil::getRoot, false);
     }
 
-    @ParameterizedTest
-    @JsonClasspathSource(value = "rotateTests.json", data = "testRotateLeft")
-    public void testRotateLeftParentNode(@Property("tree") List<Object> tree,
-                                          @Property("degree") int degree,
-                                          @Property("parentIndex") int parentIndex,
-                                          @Property("childIndex") int childIndex,
-                                          @Property("expected") List<Object> expected) throws Throwable {
-
-        testRotate(tree, degree, parentIndex, childIndex, expected, TreeUtil::getRoot, false);
-    }
-
-    private void testRotate(List<Object> tree,
-                            int degree,
-                            int parentIndex,
-                            int childIndex,
-                            List<Object> expected,
-                            ThrowingFunction<BtrfsFile, BtrfsNode> testedNodeFunction,
-                            boolean right) throws Throwable {
+    private void testMerge(List<Object> tree,
+                           int degree,
+                           int parentIndex,
+                           int childIndex,
+                           int expectedParentIndex,
+                           int expectedChildIndex,
+                           List<Object> expected,
+                           ThrowingFunction<BtrfsFile, BtrfsNode> testedNodeFunction,
+                           boolean right) throws Throwable {
 
         Context.Builder<?> context = contextBuilder()
             .subject("BtrfsFile.rotateFromRightSibling()")
@@ -79,6 +76,8 @@ public class RotateTests {
             .add("degree", degree)
             .add("parentIndex", parentIndex)
             .add("childIndex", childIndex)
+            .add("expectedParentIndex", expectedParentIndex)
+            .add("expectedChildIndex", expectedChildIndex)
             .add("expected tree", expected);
 
         TreeUtil.FileAndStorage actualFileAndStorage = constructTree(tree, degree);
@@ -93,9 +92,9 @@ public class RotateTests {
         IndexedNodeLinkedList indexedChild = new IndexedNodeLinkedList(indexedRoot, root.children[parentIndex], childIndex);
 
         if (right) {
-            callRotateRight(actualTree, indexedChild);
+            callMergeRight(actualTree, indexedChild);
         } else {
-            callRotateLeft(actualTree, indexedChild);
+            callMergeLeft(actualTree, indexedChild);
         }
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
@@ -107,29 +106,24 @@ public class RotateTests {
         assertEquals(expectedTree.getSize(), actualTree.getSize(), context.build(),
             TR -> "The size of the tree should not change");
 
-        assertEquals(parentIndex, indexedRoot.index, context.build(),
+        assertEquals(expectedParentIndex, indexedRoot.index, context.build(),
             TR -> "The index of the parent should not change");
         assertEquals(root, indexedRoot.node, context.build(),
             TR -> "The node of the parent should not change");
         assertEquals(null, indexedRoot.parent, context.build(),
             TR -> "The parent of the parent should not change");
 
-        if (right) {
-            assertEquals(childIndex, indexedChild.index, context.build(),
-                TR -> "The index of the child should not change");
-        } else {
-            assertEquals(childIndex + 1, indexedChild.index, context.build(),
-                TR -> "The index of the child is not correct");
-        }
+        assertEquals(expectedChildIndex, indexedChild.index, context.build(),
+            TR -> "The index of the child is not correct");
         assertEquals(child, indexedChild.node, context.build(),
             TR -> "The node of the child should not change");
         assertEquals(indexedRoot, indexedChild.parent, context.build(),
             TR -> "The parent of the child should not change");
     }
 
-    private void callRotateRight(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Throwable {
+    private void callMergeRight(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Throwable {
 
-        Method method = BtrfsFile.class.getDeclaredMethod("rotateFromRightSibling", IndexedNodeLinkedList.class);
+        Method method = BtrfsFile.class.getDeclaredMethod("mergeWithRightSibling", IndexedNodeLinkedList.class);
         method.setAccessible(true);
         try {
             method.invoke(tree, indexedNode);
@@ -138,9 +132,9 @@ public class RotateTests {
         }
     }
 
-    private void callRotateLeft(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Throwable {
+    private void callMergeLeft(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Throwable {
 
-        Method method = BtrfsFile.class.getDeclaredMethod("rotateFromLeftSibling", IndexedNodeLinkedList.class);
+        Method method = BtrfsFile.class.getDeclaredMethod("mergeWithLeftSibling", IndexedNodeLinkedList.class);
         method.setAccessible(true);
         try {
             method.invoke(tree, indexedNode);
@@ -150,4 +144,3 @@ public class RotateTests {
     }
 
 }
-

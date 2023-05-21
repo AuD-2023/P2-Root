@@ -85,7 +85,7 @@ public class H2_RubricProvider implements RubricProvider {
         () -> SplitTests.class.getDeclaredMethod("testSplitRoot", List.class, int.class, int.class, int.class, int.class, List.class),
         () -> SplitTests.class.getDeclaredMethod("testSplitRecursive", List.class, int.class, int.class, int.class, int.class, int.class, int.class, List.class));
 
-    Criterion H2_1 = createParentCriterion("2", "Split", H2_1_1, H2_1_2, H2_1_3, H2_1_4);
+    Criterion H2_1 = createParentCriterion("2 a)", "Split", H2_1_1, H2_1_2, H2_1_3, H2_1_4);
 
     Criterion H2_2_1 = createCriterion("Die Methode findInsertionPosition funktioniert korrekt, wenn der WurzelKnoten keine Kinder hat und kein Intervall aufgeteilt werden muss.",
         () -> FindInsertionPositionTests.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class));
@@ -105,8 +105,42 @@ public class H2_RubricProvider implements RubricProvider {
         () -> FindInsertionPositionTests.class.getDeclaredMethod("testWithKeySplitting", List.class, int.class, int.class, int.class, List.class, List.class),
         () -> FindInsertionPositionTests.class.getDeclaredMethod("testWithLeafSplitting", List.class, int.class, int.class, int.class, List.class, List.class));
 
+    Criterion H2_2 = createParentCriterion("2 b)", "findInsertionPosition", H2_2_1, H2_2_2, H2_2_3, H2_2_4);
 
+    Criterion H2_3_1 = createUntestedCriterion("Die Methode insert funktioniert korrekt, wenn alle Intervalle in den momentanen Knoten passen.");
 
+    Criterion H2_3_2 = createUntestedCriterion("Die Methode insert funktioniert korrekt, wenn nicht alle Intervalle in den momentanen Knoten passen und nach dem Splitten aber weiterhin in den selben Knoten eingefügt wird.");
+
+    Criterion H2_3_3 = createUntestedCriterion("Die Methode insert funktioniert korrekt, wenn nicht alle Intervalle in den momentanen Knoten passen und nach dem Splitten in einen anderen Knoten eingefügt wird.");
+
+    Criterion H2_3 = createParentCriterion("2 c)", "insert", H2_3_1, H2_3_2, H2_3_3);
+
+    Criterion H2 = createParentCriterion("2", "Einfügen", H2_1, H2_2, H2_3);
+
+    Criterion H3_1_1 = createCriterion("Nach dem Aufrufen der Methode rotateFromRightChild ist der Knoten, in welchen hineinrotiert wird, korrekt und an der richtigen Position.",
+        () -> RotateTests.class.getDeclaredMethod("testRotateRightOriginalNode", List.class, int.class, int.class, int.class, List.class));
+
+    Criterion H3_1_2 = createCriterion("Nach dem Aufrufen der Methode rotateFromRightChild ist der rechte Knoten korrekt und an der richtigen Position.",
+        () -> RotateTests.class.getDeclaredMethod("testRotateRightRightNode", List.class, int.class, int.class, int.class, List.class));
+
+    Criterion H3_1_3 = createCriterion("Nach dem Aufrufen der Methode rotateFromRightChild ist der gesamte Baum korrekt.",
+        () -> RotateTests.class.getDeclaredMethod("testRotateRightParentNode", List.class, int.class, int.class, int.class, List.class));
+
+    Criterion H3_1_4 = createCriterion("Nach dem Aufrufen der Methode rotateFromLeftChild ist der gesamte Baum korrekt.",
+        () -> RotateTests.class.getDeclaredMethod("testRotateLeftParentNode", List.class, int.class, int.class, int.class, List.class));
+
+    Criterion H3_1 = createParentCriterion("3 a)", "Rotieren", H3_1_1, H3_1_2, H3_1_3, H3_1_4);
+
+    Criterion H3_2_1 = createCriterion("Nach dem Aufrufen der Methode mergeWithRightChild ist der Kindknoten korrekt und an der korrekten Position.",
+        () -> MergeTests.class.getDeclaredMethod("testMergeRightOriginalNode", List.class, int.class, int.class, int.class, List.class));
+
+    Criterion H3_2_2 = createCriterion("Nach dem Aufrufen der Methode mergeWithRightChild ist der gesamte Baum korrekt.",
+        () -> MergeTests.class.getDeclaredMethod("testMergeRightParentNode", List.class, int.class, int.class, int.class, List.class));
+
+    Criterion H3_2_3 = createCriterion("Nach dem Aufrufen der Methode mergeWithLeftChild ist der gesamte Baum korrekt.",
+        () -> MergeTests.class.getDeclaredMethod("testMergeLeftParentNode", List.class, int.class, int.class, int.class, int.class, int.class, List.class));
+
+    Criterion H3_2 = createParentCriterion("3 b)", "Mergen", H3_2_1, H3_2_2, H3_2_3);
     public static final Rubric RUBRIC = Rubric.builder()
         .title("H2")
         .build();
