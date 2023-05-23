@@ -1,14 +1,31 @@
 package p2.storage;
 
-import org.jetbrains.annotations.Nullable;
-
+/**
+ * A view of a single interval in a storage.
+ */
 class SingleIntervalView implements StorageView {
 
+    /**
+     * The interval that this view is limited to.
+     */
     private final Interval interval;
-    private final Interval[] intervals = new Interval[1];
-    private final Storage storage;
-    private byte @Nullable [] data;
 
+    /**
+     * An array that holds the single interval.
+     */
+    private final Interval[] intervals = new Interval[1];
+
+    /**
+     * The underlying storage.
+     */
+    private final Storage storage;
+
+    /**
+     * Creates a new {@link SingleIntervalView} instance.
+     *
+     * @param storage the underlying storage.
+     * @param interval the interval that this view is limited to.
+     */
     public SingleIntervalView(Storage storage, Interval interval) {
         this.storage = storage;
         this.interval = interval;
@@ -25,16 +42,10 @@ class SingleIntervalView implements StorageView {
         return intervals;
     }
 
-    private void calculateData() {
-        data = new byte[length()];
-        storage.read(interval.start(), data, 0, interval.length());
-    }
-
     @Override
     public byte[] getData() {
-        if (data == null) {
-            calculateData();
-        }
+        byte[] data = new byte[length()];
+        storage.read(interval.start(), data, 0, interval.length());
         return data;
     }
 

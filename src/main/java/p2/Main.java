@@ -1,8 +1,8 @@
 package p2;
 
+import p2.storage.AllocationStrategy;
 import p2.btrfs.BtrfsFile;
 import p2.storage.FileSystem;
-import p2.storage.StringDecoder;
 import p2.storage.StringEncoder;
 
 /**
@@ -17,34 +17,36 @@ public class Main {
      */
     public static void main(String[] args) {
 
+        String fileName = "example.txt";
+        StringEncoder encoder = StringEncoder.INSTANCE;
         FileSystem fileSystem = new FileSystem(AllocationStrategy.NEXT_FIT, 200);
 
-        BtrfsFile file = fileSystem.createFile("Helo", new StringEncoder());
+        BtrfsFile file = fileSystem.createFile(fileName, "Helo", encoder);
 
-        System.out.println(fileSystem.readFile(file, new StringDecoder())); // Helo!
+        System.out.println(fileSystem.readFile(fileName, encoder)); // Helo!
 
-        fileSystem.insertIntoFile(file, 4, " World!", new StringEncoder());
+        fileSystem.insertIntoFile(fileName, 4, " World!", encoder);
 
-        System.out.println(fileSystem.readFile(file, new StringDecoder())); // Helo World!
+        System.out.println(fileSystem.readFile(fileName, encoder)); // Helo World!
 
-        fileSystem.insertIntoFile(file, 3, "l", new StringEncoder());
+        fileSystem.insertIntoFile(fileName, 3, "l", encoder);
 
-        System.out.println(fileSystem.readFile(file, new StringDecoder())); // Hello World!
+        System.out.println(fileSystem.readFile(fileName, encoder)); // Hello World!
 
-        fileSystem.insertIntoFile(file, 6, "beautiful and very very very nice and wonderful and i dont know what else ", new StringEncoder());
+        fileSystem.insertIntoFile(fileName, 6, "beautiful and very very very nice and wonderful and i dont know what else ", encoder);
 
-        System.out.println(fileSystem.readFile(file, new StringDecoder(), 0, file.getSize())); // Hello beautiful and very very very nice and wonderful and i dont know what else World!
+        System.out.println(fileSystem.readFile(fileName, encoder, 0, file.getSize())); // Hello beautiful and very very very nice and wonderful and i dont know what else World!
 
-        fileSystem.removeFromFile(file, 6, 14);
+        fileSystem.removeFromFile(fileName, 6, 14);
 
-        System.out.println(fileSystem.readFile(file, new StringDecoder())); // Hello very very very nice and wonderful and i dont know what else World
+        System.out.println(fileSystem.readFile(fileName, encoder)); // Hello very very very nice and wonderful and i dont know what else World
 
-        fileSystem.removeFromFile(file, 6, 60);
+        fileSystem.removeFromFile(fileName, 6, 60);
 
-        System.out.println(fileSystem.readFile(file, new StringDecoder())); // Hello World!
+        System.out.println(fileSystem.readFile(fileName, encoder)); // Hello World!
 
-        fileSystem.removeFromFile(file, 0, file.getSize());
+        fileSystem.removeFromFile(fileName, 0, file.getSize());
 
-        System.out.println(fileSystem.readFile(file, new StringDecoder())); // <empty>
+        System.out.println(fileSystem.readFile(fileName, encoder)); // <empty>
     }
 }

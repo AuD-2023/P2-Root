@@ -1,17 +1,35 @@
-package p2;
-
-import p2.storage.Interval;
+package p2.storage;
 
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * An {@linkplain AllocationStrategy allocation strategy} that works by iterating over the array and starting at the
+ * last interval that was allocated. It then returns the next possible intervals.
+ *
+ */
 public class NextFitAllocator implements AllocationStrategy {
 
+    /**
+     * The array that is used to mark intervals as used.
+     */
     private final boolean[] used;
 
+    /**
+     * The index of the last interval that was allocated.
+     */
     private int lastFit = -1;
+
+    /**
+     * The maximum size of an interval that will be allocated.
+     */
     private int maxIntervalSize = Integer.MAX_VALUE;
 
+    /**
+     * Creates a new {@link NextFitAllocator} instance.
+     *
+     * @param used The array that will be used to mark intervals as used.
+     */
     public NextFitAllocator(boolean[] used) {
         this.used = used;
     }
@@ -22,7 +40,7 @@ public class NextFitAllocator implements AllocationStrategy {
     }
 
     @Override
-    public List<Interval> allocate(int size) {
+    public List<Interval> allocate(int size) throws NoDiskSpaceException {
 
         int i = lastFit + 1;
         int totalSize = 0;

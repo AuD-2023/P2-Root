@@ -1,13 +1,13 @@
 package p2;
 
 import org.tudalgo.algoutils.tutor.general.assertions.Context;
+import p2.storage.AllocationStrategy;
 import p2.btrfs.BtrfsFile;
 import p2.btrfs.BtrfsNode;
 import p2.btrfs.IndexedNodeLinkedList;
 import p2.storage.FileSystem;
 import p2.storage.Interval;
 import p2.storage.Storage;
-import p2.storage.StringDecoder;
 import p2.storage.StringEncoder;
 
 import java.lang.reflect.Field;
@@ -17,7 +17,6 @@ import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertE
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertNotNull;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertNull;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertSame;
-import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertTrue;
 
 public class TreeUtil {
 
@@ -172,7 +171,7 @@ public class TreeUtil {
 
         byte[] data = new byte[key.length()];
         storage.read(key.start(), data, 0, key.length());
-        return new StringDecoder().decode(data);
+        return StringEncoder.INSTANCE.decode(data);
     }
 
     public static FileAndStorage constructTree(List<Object> tree, int degree) throws NoSuchFieldException, IllegalAccessException {
@@ -184,7 +183,7 @@ public class TreeUtil {
         allocator.setMaxIntervalSize(Integer.MAX_VALUE);
 
         NodeAndLength root = constructRoot(tree, degree, storage, allocator);
-        BtrfsFile file = new BtrfsFile(storage, degree);
+        BtrfsFile file = new BtrfsFile("test.txt", storage, degree);
         setRoot(file, root.node);
         setSize(file, root.length);
 
@@ -223,7 +222,7 @@ public class TreeUtil {
 
                 String string = (String) current;
 
-                byte[] data = new StringEncoder().encode(string);
+                byte[] data = StringEncoder.INSTANCE.encode(string);
 
                 List<Interval> intervals = allocator.allocate(data.length);
 
@@ -244,81 +243,6 @@ public class TreeUtil {
     }
 
     private record NodeAndLength(BtrfsNode node, int length) {
-    }
-
-    public String getContentOfTree(BtrfsFile file) {
-        return new StringDecoder().decode(file.readAll());
-    }
-
-    public static void checkTree(Context context, BtrfsFile file) throws NoSuchFieldException, IllegalAccessException {
-        BtrfsNode root = getRoot(file);
-        checkTree(context, root, root);
-    }
-
-    public static int checkTree(Context context, BtrfsNode node, BtrfsNode root) {
-
-        if (node != root) {
-            assertTrue(node.size >= node.degree - 1, context,
-                TR -> "A node has less than degree - 1 keys");
-        }
-
-        assertTrue(node.size <= 2 * node.degree - 1, context,
-            TR -> "A node has more than 2 * degree - 1 keys");
-
-        int sum = 0;
-
-        for (int i = 0; i < 2 * node.degree - 1; i++) {
-            int finalI = i;
-
-            if (i < node.size) {
-                assertNotNull(node.keys[i], context, TR -> "A key is null at index %d in a node with size %d".formatted(finalI, node.size));
-            } else {
-                assertNull(node.keys[i], context, TR -> "A key is not null at index %d in a node with size %d".formatted(finalI, node.size));
-            }
-
-            sum += node.keys[i] == null ? 0 : node.keys[i].length();
-        }
-
-        for (int i = 0; i < 2 * node.degree; i++) {
-
-            int finalI = i;
-            int childLength = checkTree(context, node.children[i], root);
-
-            if (i < node.size + 1) {
-                if (node.isLeaf()) {
-                    assertEquals(0, node.childLengths[0], context,
-                        TR -> "A leaf node has a child length != 0");
-                } else {
-                    assertEquals(childLength, node.childLengths[i], context,
-                        TR -> ("The child length at index %d of a node with size %d is not equal to the length of the " +
-                            "child at index %d").formatted(finalI, node.size, finalI));
-                }
-            } else {
-                assertEquals(0, node.childLengths[i], context,
-                    TR -> "The child length at index %d of a node with size %d is not equal to 0".formatted(finalI, node.size));
-            }
-
-            sum += childLength;
-        }
-
-        for (int i = 0; i < 2 * node.degree; i++) {
-            int finalI = i;
-
-            if (i < node.size + 1) {
-                if (node.isLeaf()) {
-                    assertNull(node.children[i], context, TR -> "The child of a leaf node is not null");
-                } else {
-                    assertNotNull(node.children[i], context, TR -> ("The child at index %d of a non-leaf node with " +
-                        "size %d is null").formatted(finalI, node.size));
-                }
-            } else {
-                assertNull(node.children[i], context,
-                    TR -> "The child at index %d of a node with size %d is not null".formatted(finalI, node.size));
-            }
-
-        }
-
-        return sum;
     }
 
     public static BtrfsNode getRoot(BtrfsFile file) throws NoSuchFieldException, IllegalAccessException {

@@ -3,6 +3,7 @@ package p2;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junitpioneer.jupiter.json.JsonClasspathSource;
 import org.junitpioneer.jupiter.json.Property;
+import org.sourcegrade.jagr.api.rubric.TestForSubmission;
 import org.tudalgo.algoutils.tutor.general.assertions.Context;
 import p2.btrfs.BtrfsFile;
 import p2.btrfs.BtrfsNode;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertEquals;
+import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.callObject;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.contextBuilder;
 import static p2.TreeUtil.FileAndStorage;
 import static p2.TreeUtil.assertIndexedNodeLinkedListEquals;
@@ -23,6 +25,7 @@ import static p2.TreeUtil.constructTree;
 import static p2.TreeUtil.getRoot;
 import static p2.TreeUtil.treeToString;
 
+@TestForSubmission
 public class FindInsertionPositionTests {
 
     @ParameterizedTest
@@ -93,8 +96,9 @@ public class FindInsertionPositionTests {
         FileAndStorage expectedFileAndStorage = constructTree(expected, degree);
         BtrfsFile expectedTree = expectedFileAndStorage.file();
 
-        IndexedNodeLinkedList actualIndexedNode = callFindInsertionPosition(
-            actualTree, new IndexedNodeLinkedList(null, getRoot(actualTree), 0), start, insertionSize);
+        IndexedNodeLinkedList actualIndexedNode = callObject(() -> callFindInsertionPosition(
+            actualTree, new IndexedNodeLinkedList(null, getRoot(actualTree), 0), start, insertionSize),
+            context.build(), TR -> "findInsertionPosition() should not throw an exception");
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
 
@@ -133,14 +137,18 @@ public class FindInsertionPositionTests {
     private IndexedNodeLinkedList callFindInsertionPosition(BtrfsFile tree,
                                                             IndexedNodeLinkedList indexedNode,
                                                             int start,
-                                                            int insertionSize) throws Throwable {
+                                                            int insertionSize) throws Exception {
 
         Method method = BtrfsFile.class.getDeclaredMethod("findInsertionPosition", IndexedNodeLinkedList.class, int.class, int.class, int.class, Interval.class);
         method.setAccessible(true);
         try {
             return (IndexedNodeLinkedList) method.invoke(tree, indexedNode, start, 0, insertionSize, null);
         } catch (InvocationTargetException e) {
-            throw e.getCause();
+            if (e.getCause() instanceof Exception exception) {
+                throw exception;
+            } else {
+                throw e;
+            }
         }
     }
 }

@@ -8,7 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Represents a view of a {@link Storage} that is limited to a certain interval.
+ * Represents a view of a {@link Storage} that is limited to a certain interval or multiple concatenated intervals.
+ * These intervals do not have to be adjacent and can overlap each other.
  *
  * <p>
  * Use {@link Storage#createView(Interval...)} to create a view of a storage.
@@ -20,22 +21,41 @@ import java.util.stream.Stream;
 @ApiStatus.NonExtendable
 public interface StorageView {
 
+    /**
+     * Returns the length of all intervals combined.
+     */
     int length();
 
     /**
-     * <b>Immutable. Do not modify this array.</b>
+     * Returns the intervals that this view will read from.
+     * The returned Array may not be modified.
+     *
+     * @return the intervals of this view.
      */
     Interval[] getIntervals();
 
     /**
      * Returns a new view that is the concatenation of this view and the given view.
+     * This means that the intervals of this view will be followed by the intervals of the given view.
      *
      * <p><b>Does not modify this view.</b>
      */
     StorageView plus(StorageView other);
 
+    /**
+     * Returns the storage that this view is limited to.
+     *
+     * @return the underlying storage.
+     */
     Storage getStorage();
 
+    /**
+     * Returns the data that is stored in the underlying storage at the intervals of this view.
+     * The returned array is a copy of the data in the storage.
+     * The intervals will be process in the order they were given to the view.
+     *
+     * @return The data in the storage.
+     */
     byte[] getData();
 
     /**
@@ -59,17 +79,5 @@ public interface StorageView {
                 yield new MultiIntervalView(views[0].getStorage(), intervals);
             }
         };
-    }
-
-    @ApiStatus.OverrideOnly
-    interface ByteConsumer {
-        /**
-         * Accepts a byte from a storage view.
-         *
-         * @param storageIndex  The index in the {@link Storage} space
-         * @param intervalIndex The index in the {@link Interval} space
-         * @param b             The byte
-         */
-        void accept(int storageIndex, int intervalIndex, byte b);
     }
 }

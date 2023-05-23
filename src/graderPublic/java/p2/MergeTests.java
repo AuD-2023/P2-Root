@@ -3,6 +3,7 @@ package p2;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junitpioneer.jupiter.json.JsonClasspathSource;
 import org.junitpioneer.jupiter.json.Property;
+import org.sourcegrade.jagr.api.rubric.TestForSubmission;
 import org.tudalgo.algoutils.tutor.general.assertions.Context;
 import p2.btrfs.BtrfsFile;
 import p2.btrfs.BtrfsNode;
@@ -13,6 +14,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertEquals;
+import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.call;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.contextBuilder;
 import static p2.TreeUtil.assertTreeEquals;
 import static p2.TreeUtil.constructTree;
@@ -20,6 +22,7 @@ import static p2.TreeUtil.getRoot;
 import static p2.TreeUtil.treeToString;
 
 @SuppressWarnings("DuplicatedCode")
+@TestForSubmission
 public class MergeTests {
 
     @ParameterizedTest
@@ -92,9 +95,11 @@ public class MergeTests {
         IndexedNodeLinkedList indexedChild = new IndexedNodeLinkedList(indexedRoot, root.children[parentIndex], childIndex);
 
         if (right) {
-            callMergeRight(actualTree, indexedChild);
+            call(() -> callMergeRight(actualTree, indexedChild), context.build(),
+                TR -> "mergeWithRightSibling() should not throw an exception");
         } else {
-            callMergeLeft(actualTree, indexedChild);
+            call(() -> callMergeLeft(actualTree, indexedChild), context.build(),
+                TR -> "mergeWithLeftSibling() should not throw an exception");
         }
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
@@ -121,25 +126,33 @@ public class MergeTests {
             TR -> "The parent of the child should not change");
     }
 
-    private void callMergeRight(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Throwable {
+    private void callMergeRight(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Exception {
 
         Method method = BtrfsFile.class.getDeclaredMethod("mergeWithRightSibling", IndexedNodeLinkedList.class);
         method.setAccessible(true);
         try {
             method.invoke(tree, indexedNode);
         } catch (InvocationTargetException e) {
-            throw e.getCause();
+            if (e.getCause() instanceof Exception exception) {
+                throw exception;
+            } else {
+                throw e;
+            }
         }
     }
 
-    private void callMergeLeft(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Throwable {
+    private void callMergeLeft(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Exception {
 
         Method method = BtrfsFile.class.getDeclaredMethod("mergeWithLeftSibling", IndexedNodeLinkedList.class);
         method.setAccessible(true);
         try {
             method.invoke(tree, indexedNode);
         } catch (InvocationTargetException e) {
-            throw e.getCause();
+            if (e.getCause() instanceof Exception exception) {
+                throw exception;
+            } else {
+                throw e;
+            }
         }
     }
 

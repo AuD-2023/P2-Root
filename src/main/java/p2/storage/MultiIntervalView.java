@@ -1,17 +1,33 @@
 package p2.storage;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.stream.Stream;
 
+/**
+ * A view of multiple intervals in a storage.
+ */
 class MultiIntervalView implements StorageView {
 
+    /**
+     * The underlying storage.
+     */
     private final Storage storage;
+
+    /**
+     * The total length of all intervals combined.
+     */
     private final int totalLength;
+
+    /**
+     * The intervals that this view is limited to.
+     */
     private final Interval[] intervals;
 
-    private byte @Nullable [] data;
-
+    /**
+     * Creates a new {@link MultiIntervalView} instance.
+     *
+     * @param storage the underlying storage.
+     * @param intervals the intervals that this view is limited to.
+     */
     MultiIntervalView(Storage storage, Interval... intervals) {
         this.storage = storage;
         totalLength = Stream.of(intervals)
@@ -30,19 +46,13 @@ class MultiIntervalView implements StorageView {
         return intervals;
     }
 
-    private void calculateData() {
-        data = new byte[length()];
+    @Override
+    public byte[] getData() {
+        byte[] data = new byte[length()];
         int pos = 0;
         for (final Interval interval : intervals) {
             storage.read(interval.start(), data, pos, interval.length());
             pos += interval.length();
-        }
-    }
-
-    @Override
-    public byte[] getData() {
-        if (data == null) {
-            calculateData();
         }
         return data;
     }

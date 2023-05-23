@@ -3,11 +3,14 @@ package p2;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junitpioneer.jupiter.json.JsonClasspathSource;
 import org.junitpioneer.jupiter.json.Property;
+import org.sourcegrade.jagr.api.rubric.TestForSubmission;
 import org.tudalgo.algoutils.tutor.general.assertions.Context;
 import p2.btrfs.BtrfsFile;
 import p2.btrfs.BtrfsNode;
 import p2.btrfs.IndexedNodeLinkedList;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertEquals;
@@ -20,6 +23,7 @@ import static p2.TreeUtil.treeToString;
 import static p2.TreeUtil.FileAndStorage;
 
 @SuppressWarnings("DuplicatedCode")
+@TestForSubmission
 public class SplitTests {
 
     @ParameterizedTest
@@ -49,7 +53,7 @@ public class SplitTests {
         IndexedNodeLinkedList indexedRoot = new IndexedNodeLinkedList(null, root, parentIndex);
         IndexedNodeLinkedList indexedChild = new IndexedNodeLinkedList(indexedRoot, child, childIndex);
 
-        call(() -> actualTree.split(indexedChild), context.build(), TR -> "split() should not throw an exception");
+        call(() -> callSplit(actualTree, indexedChild), context.build(), TR -> "split() should not throw an exception");
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
 
@@ -86,7 +90,7 @@ public class SplitTests {
         IndexedNodeLinkedList indexedRoot = new IndexedNodeLinkedList(null, root, parentIndex);
         IndexedNodeLinkedList indexedChild = new IndexedNodeLinkedList(indexedRoot, child, childIndex);
 
-        call(() -> actualTree.split(indexedChild), context.build(), TR -> "split() should not throw an exception");
+        call(() -> callSplit(actualTree, indexedChild), context.build(), TR -> "split() should not throw an exception");
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
 
@@ -126,7 +130,7 @@ public class SplitTests {
 
         IndexedNodeLinkedList indexedRoot = new IndexedNodeLinkedList(null, getRoot(actualTree), index);
 
-        call(() -> actualTree.split(indexedRoot), context.build(), TR -> "split() should not throw an exception");
+        call(() -> callSplit(actualTree, indexedRoot), context.build(), TR -> "split() should not throw an exception");
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
 
@@ -178,7 +182,7 @@ public class SplitTests {
         IndexedNodeLinkedList indexedRoot = new IndexedNodeLinkedList(null, root, parentIndex);
         IndexedNodeLinkedList indexedChild = new IndexedNodeLinkedList(indexedRoot, child, childIndex);
 
-        call(() -> actualTree.split(indexedChild), context.build(), TR -> "split() should not throw an exception");
+        call(() -> callSplit(actualTree, indexedChild), context.build(), TR -> "split() should not throw an exception");
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
 
@@ -199,5 +203,19 @@ public class SplitTests {
             TR -> "indexedNode.node is not equal to root.children[indexedNode.parent.parent.index].children[indexedNode.parent.index].");
         assertEquals(expectedParentIndex, indexedChild.parent.index, context.build(),
             TR -> "indexedNode.index is not correct.");
+    }
+
+    private void callSplit(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Exception {
+        Method method = BtrfsFile.class.getDeclaredMethod("split", IndexedNodeLinkedList.class);
+        method.setAccessible(true);
+        try {
+            method.invoke(tree, indexedNode);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof Exception exception) {
+                throw exception;
+            } else {
+                throw e;
+            }
+        }
     }
 }
