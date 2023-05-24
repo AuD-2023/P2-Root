@@ -26,7 +26,7 @@ import static p2.TreeUtil.treeToString;
 public class MergeTests {
 
     @ParameterizedTest
-    @JsonClasspathSource(value = "mergeTests.json", data = "testMergeRight")
+    @JsonClasspathSource(value = "MergeTests.json", data = "testMergeRight")
     public void testMergeRightOriginalNode(@Property("tree") List<Object> tree,
                                            @Property("degree") int degree,
                                            @Property("parentIndex") int parentIndex,
@@ -38,7 +38,7 @@ public class MergeTests {
     }
 
     @ParameterizedTest
-    @JsonClasspathSource(value = "mergeTests.json", data = "testMergeRight")
+    @JsonClasspathSource(value = "MergeTests.json", data = "testMergeRight")
     public void testMergeRightParentNode(@Property("tree") List<Object> tree,
                                          @Property("degree") int degree,
                                          @Property("parentIndex") int parentIndex,
@@ -50,7 +50,7 @@ public class MergeTests {
     }
 
     @ParameterizedTest
-    @JsonClasspathSource(value = "mergeTests.json", data = "testMergeLeft")
+    @JsonClasspathSource(value = "MergeTests.json", data = "testMergeLeft")
     public void testMergeLeftParentNode(@Property("tree") List<Object> tree,
                                         @Property("degree") int degree,
                                         @Property("parentIndex") int parentIndex,

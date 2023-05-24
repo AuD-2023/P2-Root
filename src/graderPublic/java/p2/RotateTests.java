@@ -26,7 +26,7 @@ import static p2.TreeUtil.treeToString;
 public class RotateTests {
 
     @ParameterizedTest
-    @JsonClasspathSource(value = "rotateTests.json", data = "testRotateRight")
+    @JsonClasspathSource(value = "RotateTests.json", data = "testRotateRight")
     public void testRotateRightOriginalNode(@Property("tree") List<Object> tree,
                                             @Property("degree") int degree,
                                             @Property("parentIndex") int parentIndex,
@@ -37,7 +37,7 @@ public class RotateTests {
     }
 
     @ParameterizedTest
-    @JsonClasspathSource(value = "rotateTests.json", data = "testRotateRight")
+    @JsonClasspathSource(value = "RotateTests.json", data = "testRotateRight")
     public void testRotateRightRightNode(@Property("tree") List<Object> tree,
                                          @Property("degree") int degree,
                                          @Property("parentIndex") int parentIndex,
@@ -48,7 +48,7 @@ public class RotateTests {
     }
 
     @ParameterizedTest
-    @JsonClasspathSource(value = "rotateTests.json", data = "testRotateRight")
+    @JsonClasspathSource(value = "RotateTests.json", data = "testRotateRight")
     public void testRotateRightParentNode(@Property("tree") List<Object> tree,
                                           @Property("degree") int degree,
                                           @Property("parentIndex") int parentIndex,
@@ -59,7 +59,7 @@ public class RotateTests {
     }
 
     @ParameterizedTest
-    @JsonClasspathSource(value = "rotateTests.json", data = "testRotateLeft")
+    @JsonClasspathSource(value = "RotateTests.json", data = "testRotateLeft")
     public void testRotateLeftParentNode(@Property("tree") List<Object> tree,
                                           @Property("degree") int degree,
                                           @Property("parentIndex") int parentIndex,
