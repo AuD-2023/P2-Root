@@ -87,6 +87,28 @@ public class FileSystem {
     }
 
     /**
+     * Writes data into a file at a given position. This will overwrite existing data.
+     *
+     * @param fileName the name of the file.
+     * @param start The position (logical address) at which the data will be inserted.
+     * @param data The data that will be inserted.
+     * @param encoder The encoder that will be used to encode the data.
+     * @param <T> The type of the data that will be inserted.
+     * @throws NoSuchBtrfsFileException If there is no file with the given name.
+     */
+    public <T> void writeIntoFile(String fileName, int start, T data, DataEncoder<T> encoder) throws NoSuchBtrfsFileException {
+        BtrfsFile file = getFile(fileName);
+
+        if (!files.contains(file)) {
+            throw new IllegalArgumentException("File not part of this fileSystem");
+        }
+
+        byte[] encoded = encoder.encode(data);
+        List<Interval> intervals = allocator.allocate(encoded.length);
+        file.write(start, intervals, encoded);
+    }
+
+    /**
      * Reads the whole data stored inside a file.
      *
      * @param fileName The name of the file.
