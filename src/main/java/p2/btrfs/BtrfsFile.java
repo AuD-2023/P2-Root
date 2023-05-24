@@ -27,6 +27,8 @@ public class BtrfsFile {
      */
     private final int degree;
 
+    private final int maxKeys;
+
     /**
      * The root node of the B-tree.
      */
@@ -48,6 +50,7 @@ public class BtrfsFile {
         this.name = name;
         this.storage = storage;
         this.degree = degree;
+        maxKeys = 2 * degree - 1;
         root = new BtrfsNode(degree);
     }
 
@@ -132,7 +135,7 @@ public class BtrfsFile {
             if (lengthRead == length) {
                 return view;
             } else if (lengthRead > length) {
-                throw new AssertionError(); // sanity check
+                throw new IllegalStateException("Read more keys than wanted"); // sanity check
             }
 
 
@@ -159,7 +162,7 @@ public class BtrfsFile {
             if (lengthRead == length) {
                 return view;
             } else if (lengthRead > length) {
-                throw new AssertionError(); // sanity check
+                throw new IllegalStateException("Read more keys than wanted"); // sanity check
             }
         }
 
@@ -213,7 +216,7 @@ public class BtrfsFile {
      */
     private void insert(List<Interval> intervals, IndexedNodeLinkedList indexedLeaf, int remainingLength) {
 
-        int amountToInsert = Math.min(intervals.size(), 2 * degree - 1 - indexedLeaf.node.size);
+        int amountToInsert = Math.min(intervals.size(), maxKeys - indexedLeaf.node.size);
 
         if (indexedLeaf.index < indexedLeaf.node.size) {
             System.arraycopy(indexedLeaf.node.keys, indexedLeaf.index, indexedLeaf.node.keys,
@@ -369,7 +372,7 @@ public class BtrfsFile {
         BtrfsNode right = new BtrfsNode(degree);
 
         // calculate length of right node
-        int rightLength = indexedNode.node.childLengths[2 * degree - 1];
+        int rightLength = indexedNode.node.childLengths[maxKeys];
         for (int i = degree; i < indexedNode.node.size; i++) {
             rightLength += indexedNode.node.childLengths[i];
             rightLength += indexedNode.node.keys[i].length();
@@ -450,14 +453,14 @@ public class BtrfsFile {
         }
 
         // reset removed elements of node
-        for (int i = degree - 1; i < 2 * degree - 1; i++) {
+        for (int i = degree - 1; i < maxKeys; i++) {
             originalNode.children[i + 1] = null;
             originalNode.childLengths[i + 1] = 0;
             originalNode.keys[i] = null;
         }
 
-        originalNode.children[2 * degree - 1] = null;
-        originalNode.childLengths[2 * degree - 1] = 0;
+        originalNode.children[maxKeys] = null;
+        originalNode.childLengths[maxKeys] = 0;
     }
 
     /**
@@ -486,7 +489,7 @@ public class BtrfsFile {
         if (removed < length) {
             throw new IllegalArgumentException("start + length is out of bounds");
         } else if (removed > length) {
-            throw new AssertionError(); // sanity check
+            throw new IllegalStateException("Removed more keys than wanted"); // sanity check
         }
     }
 
@@ -511,7 +514,7 @@ public class BtrfsFile {
 
             // check if we have removed enough
             if (removedLength > length) {
-                throw new AssertionError(); // sanity check
+                throw new IllegalStateException("Removed more keys than wanted"); // sanity check
             } else if (removedLength == length) {
                 return removedLength - initiallyRemoved;
             }
@@ -540,7 +543,7 @@ public class BtrfsFile {
                     if (removedLength == length) {
                         return removedLength - initiallyRemoved;
                     } else if (removedLength > length) {
-                        throw new AssertionError(); // sanity check
+                        throw new IllegalStateException("Removed more keys than wanted"); // sanity check
                     }
                 }
 
@@ -561,7 +564,7 @@ public class BtrfsFile {
             if (start > cumulativeLength && start < cumulativeLength + key.length()) {
 
                 // calculate the new length of the key
-                int newLength = start - cumulativeLength;
+                final int newLength = start - cumulativeLength;
 
                 // update cumulativeLength before updating the key
                 cumulativeLength += key.length();
@@ -582,8 +585,8 @@ public class BtrfsFile {
                 // if the key is longer than the length to be removed we just have to shorten the key
                 if (key.length() > length - removedLength) {
 
-                    int newLength = key.length() - (length - removedLength);
-                    int newStart = key.start() + (key.length() - newLength);
+                    final int newLength = key.length() - (length - removedLength);
+                    final int newStart = key.start() + (key.length() - newLength);
 
                     // update the key
                     indexedNode.node.keys[indexedNode.index] = new Interval(newStart, newLength);
@@ -620,7 +623,7 @@ public class BtrfsFile {
 
                     // try to replace with rightmost key of left child
                     if (indexedNode.node.children[indexedNode.index].size >= degree) {
-                        Interval removedKey = removeRightMostKey(new IndexedNodeLinkedList(indexedNode,
+                        final Interval removedKey = removeRightMostKey(new IndexedNodeLinkedList(indexedNode,
                             indexedNode.node.children[indexedNode.index], 0));
 
                         // update childLength of current node
@@ -634,7 +637,7 @@ public class BtrfsFile {
 
                         // try to replace with leftmost key of right child
                     } else if (indexedNode.node.children[indexedNode.index + 1].size >= degree) {
-                        Interval removedKey = removeLeftMostKey(new IndexedNodeLinkedList(indexedNode,
+                        final Interval removedKey = removeLeftMostKey(new IndexedNodeLinkedList(indexedNode,
                             indexedNode.node.children[indexedNode.index + 1], 0));
 
                         // update childLength of current node
@@ -697,7 +700,7 @@ public class BtrfsFile {
 
         // check if we have removed enough
         if (removedLength > length) {
-            throw new AssertionError(); // sanity check
+            throw new IllegalStateException("Removed more keys than wanted"); // sanity check
         } else if (removedLength == length) {
             return removedLength - initiallyRemoved;
         }
@@ -884,7 +887,7 @@ public class BtrfsFile {
 
         // update size of parent and middle child
         parentNode.size--;
-        middleChild.size = 2 * degree - 1;
+        middleChild.size = maxKeys;
 
         // we moved one to the left in the parent
         indexedNode.parent.index--;
@@ -929,7 +932,7 @@ public class BtrfsFile {
 
         // update size of parent and middle child
         parentNode.size--;
-        middleChild.size = 2 * degree - 1;
+        middleChild.size = maxKeys;
     }
 
     /**
