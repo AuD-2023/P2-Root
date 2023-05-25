@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+@SuppressWarnings("unused")
 public class P2_RubricProvider implements RubricProvider {
 
     private static Criterion createUntestedCriterion(String shortDescription) {
@@ -137,23 +138,34 @@ public class P2_RubricProvider implements RubricProvider {
 
     public static final Criterion H3_2 = createParentCriterion("3 b)", "Mergen", H3_2_1, H3_2_2, H3_2_3);
 
-    public static final Criterion H3_3_1 = createUntestedCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt wenn rotateFromRightChild aufgerufen werden muss.");
+    public static final Criterion H3_3_1 = createCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt, wenn rotateFromRightChild aufgerufen werden muss.",
+        () -> EnsureSizeTests.class.getDeclaredMethod("testRotateRight", List.class, int.class, int.class, int.class, int.class, int.class, List.class));
 
-    public static final Criterion H3_3_2 = createUntestedCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt wenn rotateFromLeftChild aufgerufen werden muss.");
+    public static final Criterion H3_3_2 = createCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt, wenn rotateFromLeftChild aufgerufen werden muss, oder beide aufgerufen werden können.",
+        () -> EnsureSizeTests.class.getDeclaredMethod("testRotateLeft", List.class, int.class, int.class, int.class, int.class, int.class, List.class),
+        () -> EnsureSizeTests.class.getDeclaredMethod("testRotateBoth", List.class, int.class, int.class, int.class, int.class, int.class, int.class, List.class, List.class));
 
-    public static final Criterion H3_3_3 = createUntestedCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt wenn mergeWithRightChild aufgerufen werden muss.");
+    public static final Criterion H3_3_3 = createCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt, wenn mergeWithRightChild aufgerufen werden muss.",
+        () -> EnsureSizeTests.class.getDeclaredMethod("testMergeRight", List.class, int.class, int.class, int.class, int.class, int.class, List.class));
 
-    public static final Criterion H3_3_4 = createUntestedCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt wenn mergeWithLeftChild aufgerufen werden muss oder keine Methode aufgerufen werden muss.");
+    public static final Criterion H3_3_4 = createCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt, wenn mergeWithLeftChild aufgerufen werden kann, beide Methoden aufgerufen werden können, oder gar keine Methode aufgerufen werden muss.",
+        () -> EnsureSizeTests.class.getDeclaredMethod("testMergeLeft", List.class, int.class, int.class, int.class, int.class, int.class, List.class),
+        () -> EnsureSizeTests.class.getDeclaredMethod("testMergeBoth", List.class, int.class, int.class, int.class, int.class, int.class, int.class, int.class, List.class, List.class),
+        () -> EnsureSizeTests.class.getDeclaredMethod("testNoChange", List.class, int.class, int.class, int.class));
 
     public static final Criterion H3_3 = createParentCriterion("3 c)", "ensureSize", H3_3_1, H3_3_2, H3_3_3, H3_3_4);
 
-    public static final Criterion H3_4_1 = createUntestedCriterion("Die Methode [[[removeRightMostKey]]] funktioniert korrekt wenn der Knoten ein Blattknoten ist.");
+    public static final Criterion H3_4_1 = createCriterion("Die Methode [[[removeRightMostKey]]] funktioniert korrekt, wenn der Knoten ein Blattknoten ist und mehr als die Mindestanzahl an Schlüsselwerten besitzt.",
+        () -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveRightLeaf", List.class, int.class, String.class, List.class));
 
-    public static final Criterion H3_4_2 = createUntestedCriterion("Die Methode [[[removeRightMostKey]]] funktioniert korrekt wenn der Knoten kein Blattknoten ist und beim Absteigen keine Korrektur wegen vollen Knoten notwendig ist.");
+    public static final Criterion H3_4_2 = createCriterion("Die Methode [[[removeRightMostKey]]] funktioniert korrekt, wenn der Knoten kein Blattknoten ist und der zugehörige Blattknoten mehr als die Mindestanzahl an Schlüsselwerten besitzt.",
+        () -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveRightNoCorrection", List.class, int.class, String.class, List.class));
 
-    public static final Criterion H3_4_3 = createUntestedCriterion("Die Methode [[[removeRightMostKey]]] funktioniert korrekt wenn der Knoten kein Blattknoten ist und beim Absteigen eine Korrektur wegen vollen Knoten notwendig ist.");
+    public static final Criterion H3_4_3 = createCriterion("Die Methode [[[removeRightMostKey]]] funktioniert korrekt, wenn der Knoten kein Blattknoten ist und der zugehörige Blattknoten die Mindestanzahl an Schlüsselwerten besitzt.",
+        () -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveRightWithCorrection", List.class, int.class, String.class, List.class));
 
-    public static final Criterion H3_4_4 = createUntestedCriterion("Die Methode [[[removeLeftMostKey]]] funktioniert korrekt.");
+    public static final Criterion H3_4_4 = createCriterion("Die Methode [[[removeLeftMostKey]]] funktioniert korrekt.",
+        () -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveLeft", List.class, int.class, String.class, List.class));
 
     public static final Criterion H3_4 = createParentCriterion("3 d)", "removeRightMostKey und removeLeftMostKey", H3_4_1, H3_4_2, H3_4_3, H3_4_4);
 

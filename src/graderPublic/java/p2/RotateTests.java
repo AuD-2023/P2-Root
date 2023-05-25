@@ -78,12 +78,12 @@ public class RotateTests {
                             boolean right) throws Throwable {
 
         Context.Builder<?> context = contextBuilder()
-            .subject("BtrfsFile.rotateFromRightSibling()")
+            .subject("BtrfsFile.rotateFrom*Sibling()")
             .add("tree", treeToString(tree))
             .add("degree", degree)
             .add("parentIndex", parentIndex)
             .add("childIndex", childIndex)
-            .add("expected tree", expected);
+            .add("expected tree", treeToString(expected));
 
         TreeUtil.FileAndStorage actualFileAndStorage = constructTree(tree, degree);
         BtrfsFile actualTree = actualFileAndStorage.file();

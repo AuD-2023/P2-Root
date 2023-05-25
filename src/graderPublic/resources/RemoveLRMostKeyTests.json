@@ -1,0 +1,82 @@
+{
+  "testRemoveRightLeaf": [
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "key": "E",
+      "expected": ["A", "B", "C", "D"]
+    },
+    {
+      "tree": ["A", "B", "C"],
+      "degree": 3,
+      "key": "C",
+      "expected": ["A", "B"]
+    }
+  ],
+  "testRemoveRightNoCorrection": [
+    {
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G", "H", "I"]],
+      "degree": 3,
+      "key": "I",
+      "expected": [["A", "B", "C", "D"], "E", ["F", "G", "H"]]
+    },
+    {
+    "tree": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H"]], "I", [["J", "K"], "L", ["M", "N"], "O", ["P", "Q", "R", "S", "T"]]],
+    "degree": 3,
+    "key": "T",
+    "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H"]], "I", [["J", "K"], "L", ["M", "N"], "O", ["P", "Q", "R", "S"]]]
+    }
+  ],
+  "testRemoveRightWithCorrection": [
+    {
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G"]],
+      "degree": 3,
+      "key": "G",
+      "expected": [["A", "B", "C"], "D", ["E", "F"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"]],
+      "degree": 3,
+      "key": "H",
+      "expected": [["A", "B"], "C", ["D", "E", "F", "G"]]
+    }
+  ],
+  "testRemoveLeft": [
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "key": "A",
+      "expected": ["B", "C", "D", "E"]
+    },
+    {
+      "tree": ["A", "B", "C"],
+      "degree": 3,
+      "key": "A",
+      "expected": ["B", "C"]
+    },
+    {
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G", "H", "I"]],
+      "degree": 3,
+      "key": "A",
+      "expected": [["B", "C", "D"], "E", ["F", "G", "H", "I"]]
+    },
+    {
+      "tree": [[["A", "B", "C", "D", "E"], "F", ["G", "H"], "I", ["J", "K"]], "L", [["M", "N"], "O", ["P", "Q"], "R", ["S", "T"]]],
+      "degree": 3,
+      "key": "A",
+      "expected": [[["B", "C", "D", "E"], "F", ["G", "H"], "I", ["J", "K"]], "L", [["M", "N"], "O", ["P", "Q"], "R", ["S", "T"]]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E", "F", "G"]],
+      "degree": 3,
+      "key": "A",
+      "expected": [["B", "C"], "D", ["E", "F", "G"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"]],
+      "degree": 3,
+      "key": "A",
+      "expected": [["B", "C", "D", "E"], "F", ["G", "H"]]
+    }
+  ]
+}

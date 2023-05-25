@@ -1,0 +1,192 @@
+{
+  "testNoChange": [
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": -1
+    },
+    {
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G", "H", "I"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 2
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I", "J", "K"]],
+      "degree": 3,
+      "parentIndex": 0,
+      "childIndex": 1
+    },
+    {
+      "tree": ["A", "B"],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": -1
+    },
+    {
+      "tree": ["A"],
+      "degree": 3,
+      "parentIndex": 0,
+      "childIndex": -1
+    }
+  ],
+  "testRotateRight": [
+    {
+      "tree": [["A", "B"], "C", ["D", "E", "F"]],
+      "degree": 3,
+      "parentIndex": 0,
+      "childIndex": 0,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 0,
+      "expected": [["A", "B", "C"], "D", ["E", "F"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E", "F", "G", "H"]],
+      "degree": 3,
+      "parentIndex": 0,
+      "childIndex": 1,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 1,
+      "expected": [["A", "B", "C"], "D", ["E", "F", "G", "H"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I", "J", "K"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 1,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 1,
+      "expected": [["A", "B"], "C", ["D", "E", "F"], "G", ["H", "I", "J", "K"]]
+    }
+  ],
+  "testRotateLeft": [
+    {
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 0,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 1,
+      "expected": [["A", "B", "C"], "D", ["E", "F", "G"]]
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 1,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 2,
+      "expected": [["A", "B", "C", "D"], "E", ["F", "G", "H"]]
+    },
+    {
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G", "H", "I"], "J", ["K", "L"]],
+      "degree": 3,
+      "parentIndex": 2,
+      "childIndex": 1,
+      "expectedParentIndex": 2,
+      "expectedChildIndex": 2,
+      "expected": [["A", "B", "C", "D"], "E", ["F", "G", "H"], "I", ["J", "K", "L"]]
+    },
+    {
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G"], "H", ["I", "J"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 0,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 1,
+      "expected": [["A", "B", "C"], "D", ["E", "F", "G"], "H", ["I", "J"]]
+    }
+  ],
+  "testRotateBoth": [
+    {
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G"], "H", ["I", "J", "K"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 1,
+      "expectedParentIndex": 1,
+      "expectedChildIndex1": 1,
+      "expectedChildIndex2": 2,
+      "expected1": [["A", "B", "C", "D"], "E", ["F", "G", "H"], "I", ["J", "K"]],
+      "expected2": [["A", "B", "C"], "D", ["E", "F", "G"], "H", ["I", "J", "K"]]
+    }
+  ],
+  "testMergeRight": [
+    {
+      "tree": [["A", "B"], "C", ["D", "E"]],
+      "degree": 3,
+      "parentIndex": 0,
+      "childIndex": 1,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 1,
+      "expected": ["A", "B", "C", "D", "E"]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"]],
+      "degree": 3,
+      "parentIndex": 0,
+      "childIndex": 1,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 1,
+      "expected": [["A", "B", "C", "D", "E"], "F", ["G", "H"]]
+    }
+  ],
+  "testMergeLeft": [
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"]],
+      "degree": 3,
+      "parentIndex": 2,
+      "childIndex": 0,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 3,
+      "expected": [["A", "B"], "C", ["D", "E", "F", "G", "H"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 1,
+      "expectedParentIndex": 0,
+      "expectedChildIndex": 4,
+      "expected": ["A", "B", "C", "D", "E"]
+    }
+  ],
+  "testMergeBoth": [
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 0,
+      "expectedParentIndex1": 1,
+      "expectedParentIndex2": 0,
+      "expectedChildIndex1": 0,
+      "expectedChildIndex2": 3,
+      "expected1": [["A", "B"], "C", ["D", "E", "F", "G", "H"]],
+      "expected2": [["A", "B", "C", "D", "E"], "F", ["G", "H"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K", "L", "M", "N"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 1,
+      "expectedParentIndex1": 1,
+      "expectedParentIndex2": 0,
+      "expectedChildIndex1": 1,
+      "expectedChildIndex2": 4,
+      "expected1": [["A", "B"], "C", ["D", "E", "F", "G", "H"], "I", ["J", "K", "L", "M", "N"]],
+      "expected2": [["A", "B", "C", "D", "E"], "F", ["G", "H"], "I", ["J", "K", "L", "M", "N"]]
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H"], "I", ["J", "K"], "L", ["M", "N"]],
+      "degree": 3,
+      "parentIndex": 2,
+      "childIndex": 1,
+      "expectedParentIndex1": 2,
+      "expectedParentIndex2": 1,
+      "expectedChildIndex1": 1,
+      "expectedChildIndex2": 4,
+      "expected1": [["A", "B", "C", "D", "E"], "F", ["G", "H"], "I", ["J", "K", "L", "M", "N"]],
+      "expected2": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I", "J", "K"], "L", ["M", "N"]]
+    }
+  ]
+}

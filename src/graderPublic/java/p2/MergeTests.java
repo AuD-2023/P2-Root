@@ -74,14 +74,14 @@ public class MergeTests {
                            boolean right) throws Throwable {
 
         Context.Builder<?> context = contextBuilder()
-            .subject("BtrfsFile.rotateFromRightSibling()")
+            .subject("BtrfsFile.mergeWith*Sibling()")
             .add("tree", treeToString(tree))
             .add("degree", degree)
             .add("parentIndex", parentIndex)
             .add("childIndex", childIndex)
             .add("expectedParentIndex", expectedParentIndex)
             .add("expectedChildIndex", expectedChildIndex)
-            .add("expected tree", expected);
+            .add("expected tree", treeToString(expected));
 
         TreeUtil.FileAndStorage actualFileAndStorage = constructTree(tree, degree);
         BtrfsFile actualTree = actualFileAndStorage.file();

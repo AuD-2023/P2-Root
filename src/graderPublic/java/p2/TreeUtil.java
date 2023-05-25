@@ -20,6 +20,20 @@ import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertS
 
 public class TreeUtil {
 
+    public static void assertIntervalEquals(Context context,
+                                            String expected,
+                                            Interval actual,
+                                            Storage actualStorage,
+                                            String message) {
+
+
+        byte[] actualBytes = new byte[actual.length()];
+        actualStorage.read(actual.start(), actualBytes, 0, actual.length());
+
+        String actualString = StringEncoder.INSTANCE.decode(actualBytes);
+
+        assertEquals(expected, actualString, context, TR -> message.formatted(expected, actualString));
+    }
 
     public static void assertIndexedNodeLinkedListEquals(Context context,
                                                          IndexedNodeLinkedList expected,
@@ -71,7 +85,16 @@ public class TreeUtil {
 
         for (int i = 0; i < expectedNode.size; i++) {
             int finalI = i;
-            assertEquals(expectedNode.keys[i], actualNode.keys[i], context,
+
+            byte[] expectedBytes = new byte[expectedNode.keys[i].length()];
+            expectedStorage.read(expectedNode.keys[i].start(), expectedBytes, 0, expectedNode.keys[i].length());
+            String expectedString = StringEncoder.INSTANCE.decode(expectedBytes);
+
+            byte[] actualBytes = new byte[actualNode.keys[i].length()];
+            actualStorage.read(actualNode.keys[i].start(), actualBytes, 0, actualNode.keys[i].length());
+            String actualString = StringEncoder.INSTANCE.decode(actualBytes);
+
+            assertEquals(expectedString, actualString, context,
                 TR -> message + " The key at index %d of the node %s is not correct. Expected Node: %s"
                     .formatted(finalI, treeToString(actualNode, actualStorage), treeToString(expectedNode, expectedStorage)));
         }
@@ -83,7 +106,7 @@ public class TreeUtil {
                 assertNotNull(actualNode.children[i], context,
                     TR -> message + " The child at index %d of the node %s is null. Expected Node: %s"
                         .formatted(finalI, treeToString(actualNode, actualStorage), treeToString(expectedNode, expectedStorage)));
-                assertTreeEquals(context, message, expectedNode.children[i], actualNode.children[i], actualStorage, expectedStorage);
+                assertTreeEquals(context, message, expectedNode.children[i], actualNode.children[i], expectedStorage, actualStorage);
             } else {
                 assertNull(actualNode.children[i], context,
                     TR -> message + " The child at index %d of the node %s is not null. Expected Node: %s"
