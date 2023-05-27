@@ -66,7 +66,7 @@ public class P2_RubricProvider implements RubricProvider {
 
     public static final Criterion H1 = createParentCriterion("1", "Lesen", H1_1, H1_2, H1_3, H1_4);
 
-    public static final Criterion H2_1_1 = createCriterion("Die Methode [[[split]]] funktioniert splittet den Knoten in normalen Fällen korrekt.",
+    public static final Criterion H2_1_1 = createCriterion("Die Methode [[[split]]] splittet den Knoten in normalen Fällen korrekt.",
         () -> SplitTests.class.getDeclaredMethod("testSimpleSplit", List.class, int.class, int.class, int.class, List.class));
 
     public static final Criterion H2_1_2 = createCriterion("Die Methode [[[split]]] aktualisiert die Werte in der übergebenen IndexedNodeLinkedList korrekt.",

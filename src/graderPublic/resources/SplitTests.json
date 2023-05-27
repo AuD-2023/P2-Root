@@ -42,6 +42,13 @@
       ]
     },
     {
+      "tree": [["AB", "CD"], "EF", ["GH", "IJ", "KL", "MN", "OP"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 1,
+      "expected": [["AB", "CD"], "EF", ["GH", "IJ"], "KL", ["MN", "OP"]]
+    },
+    {
       "tree": [
         [
           [
@@ -351,6 +358,14 @@
       "expected": [["A", "B"], "C", ["D", "E"]]
     },
     {
+      "tree": ["AB", "CD", "EF", "GH", "IJ"],
+      "degree": 3,
+      "index": 4,
+      "expectedParentIndex": 1,
+      "expectedChildIndex": 1,
+      "expected": [["AB", "CD"], "EF", ["GH", "IJ"]]
+    },
+    {
       "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K"], "L", ["M", "N"], "O", ["P", "Q"]],
       "degree": 3,
       "index": 0,
@@ -361,7 +376,7 @@
   ],
   "testSplitRecursive": [
     {
-      "tree": [["A", "B", "C", "D", "E"],"F", ["G", "H"], "I", ["J", "K"], "L", ["M", "N"], "O", ["P", "Q"], "R", ["S", "T"]],
+      "tree": [["AB", "CD", "EF", "GH", "IJ"], "KL", ["MN", "OP"], "QR", ["ST", "UV"], "WX", ["YZ", "ab"], "cd", ["ef", "gh"], "ij", ["kl", "mn"]],
       "degree": 3,
       "index": 0,
       "parentIndex": 0,
@@ -369,7 +384,7 @@
       "expectedGrandParentIndex": 0,
       "expectedParentIndex": 0,
       "expectedChildIndex": 0,
-      "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K"]], "L", [["M", "N"], "O", ["P", "Q"], "R", ["S", "T"]]]
+      "expected": [[["AB", "CD"], "EF", ["GH", "IJ"], "KL", ["MN", "OP"], "QR", ["ST", "UV"]], "WX", [["YZ", "ab"], "cd", ["ef", "gh"], "ij", ["kl", "mn"]]]
     },
     {
       "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K", "L", "M", "N"], "O", ["P", "Q"], "R", ["S", "T"]],
