@@ -5,6 +5,7 @@ import p2.storage.Interval;
 import p2.storage.Storage;
 import p2.storage.StorageView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -316,7 +317,7 @@ public class BtrfsFile {
                 Interval oldInterval = indexedNode.node.keys[indexedNode.index];
 
                 // create new intervals for the left and right part of the old interval
-                Interval newLeftInterval = new Interval(oldInterval.start(), (cumulativeLength + oldInterval.length()) - start);
+                Interval newLeftInterval = new Interval(oldInterval.start(), start - cumulativeLength);
                 Interval newRightInterval = new Interval(newLeftInterval.start() + newLeftInterval.length(),
                     oldInterval.length() - newLeftInterval.length());
 
@@ -337,6 +338,15 @@ public class BtrfsFile {
 
         if (indexedNode.node.isLeaf()) {
             return indexedNode;
+        }
+
+        //if last child is full, split it
+        if (indexedNode.node.children[indexedNode.node.size].isFull()) {
+            split(new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.node.size], 0));
+
+            // check again where we should insert
+            indexedNode.index--;
+            return findInsertionPosition(indexedNode, start, cumulativeLength, insertionSize, splitKey);
         }
 
         indexedNode.node.childLengths[indexedNode.node.size] += insertionSize;
@@ -565,6 +575,32 @@ public class BtrfsFile {
 
                 // calculate the new length of the key
                 final int newLength = start - cumulativeLength;
+
+                // check if we are only removing the middle of a single interval
+                if (key.length() - newLength > length) {
+
+                    // update the key with the start of the interval
+                    Interval startInterval = new Interval(key.start(), newLength);
+                    indexedNode.node.keys[indexedNode.index] = startInterval;
+
+                    // create a new key for the end of the interval
+                    Interval endInterval = new Interval(key.start() + newLength + length, key.length() - newLength - length);
+
+                    // findInsertionIndex assumes that the current node is not full
+                    if (indexedNode.node.isFull()) {
+                        split(indexedNode);
+                    }
+
+                    // insert the new key for the end of the interval
+                    insert(new ArrayList<>(List.of(endInterval)),
+                        findInsertionPosition(indexedNode, start + startInterval.length() + 1, cumulativeLength + startInterval.length(), endInterval.length(), null),
+                        endInterval.length());
+
+                    //update removedLength
+                    removedLength += key.length() - startInterval.length() - endInterval.length();
+
+                    return removedLength - initiallyRemoved;
+                }
 
                 // update cumulativeLength before updating the key
                 cumulativeLength += key.length();
