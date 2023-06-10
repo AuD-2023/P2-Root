@@ -33,17 +33,21 @@ public class Main {
 
         System.out.println(fileSystem.readFile(fileName, encoder)); // Hello World!
 
+        fileSystem.writeIntoFile(fileName, 6, "Earth", encoder);
+
+        System.out.println(fileSystem.readFile(fileName, encoder)); // Hello Earth!
+
         fileSystem.insertIntoFile(fileName, 6, "beautiful and very very very nice and wonderful and i dont know what else ", encoder);
 
-        System.out.println(fileSystem.readFile(fileName, encoder, 0, file.getSize())); // Hello beautiful and very very very nice and wonderful and i dont know what else World!
+        System.out.println(fileSystem.readFile(fileName, encoder, 0, file.getSize())); // Hello beautiful and very very very nice and wonderful and i dont know what else Earth!
 
         fileSystem.removeFromFile(fileName, 6, 14);
 
-        System.out.println(fileSystem.readFile(fileName, encoder)); // Hello very very very nice and wonderful and i dont know what else World
+        System.out.println(fileSystem.readFile(fileName, encoder)); // Hello very very very nice and wonderful and i dont know what else Earth
 
         fileSystem.removeFromFile(fileName, 6, 60);
 
-        System.out.println(fileSystem.readFile(fileName, encoder)); // Hello World!
+        System.out.println(fileSystem.readFile(fileName, encoder)); // Hello Earth!
 
         fileSystem.removeFromFile(fileName, 0, file.getSize());
 

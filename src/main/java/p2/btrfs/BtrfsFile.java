@@ -43,9 +43,9 @@ public class BtrfsFile {
     /**
      * Creates a new {@link BtrfsFile} instance.
      *
-     * @param name the name of the file.
+     * @param name    the name of the file.
      * @param storage the storage in which the file is stored.
-     * @param degree the degree of the B-tree.
+     * @param degree  the degree of the B-tree.
      */
     public BtrfsFile(String name, Storage storage, int degree) {
         this.name = name;
@@ -99,7 +99,7 @@ public class BtrfsFile {
     /**
      * Reads the given amount of data from the file starting at the given start position.
      *
-     * @param start the start position.
+     * @param start  the start position.
      * @param length the amount of data to read.
      * @return a {@link StorageView} containing the data that was read.
      */
@@ -110,11 +110,11 @@ public class BtrfsFile {
     /**
      * Reads the given amount of data from the given node starting at the given start position.
      *
-     * @param start the start position.
-     * @param length the amount of data to read.
-     * @param node the current node to read from.
+     * @param start            the start position.
+     * @param length           the amount of data to read.
+     * @param node             the current node to read from.
      * @param cumulativeLength the cumulative length of the intervals that have been visited so far.
-     * @param lengthRead the amount of data that has been read so far.
+     * @param lengthRead       the amount of data that has been read so far.
      * @return a {@link StorageView} containing the data that was read.
      */
     private StorageView read(int start, int length, BtrfsNode node, int cumulativeLength, int lengthRead) {
@@ -181,9 +181,9 @@ public class BtrfsFile {
     /**
      * Insert the given data into the file starting at the given start position.
      *
-     * @param start the start position.
+     * @param start     the start position.
      * @param intervals the intervals to write to.
-     * @param data the data to write into the storage.
+     * @param data      the data to write into the storage.
      */
     public void insert(int start, List<Interval> intervals, byte[] data) {
 
@@ -211,8 +211,8 @@ public class BtrfsFile {
     /**
      * Inserts the given data into the given leaf at the given index.
      *
-     * @param intervals the intervals to insert.
-     * @param indexedLeaf The node and index to insert at.
+     * @param intervals       the intervals to insert.
+     * @param indexedLeaf     The node and index to insert at.
      * @param remainingLength the remaining length of the data to insert.
      */
     private void insert(List<Interval> intervals, IndexedNodeLinkedList indexedLeaf, int remainingLength) {
@@ -255,13 +255,13 @@ public class BtrfsFile {
      * It ensures that the start position is not in the middle of an existing interval
      * and updates the childLengths of the visited nodes.
      *
-     * @param indexedNode The current Position in the tree.
-     * @param start The start position of the intervals to insert.
+     * @param indexedNode      The current Position in the tree.
+     * @param start            The start position of the intervals to insert.
      * @param cumulativeLength The length of the intervals in the tree up to the current node and index.
-     * @param insertionSize The total size of the intervals to insert.
-     * @param splitKey The right half of the interval that had to be split to ensure that the start position
-     *                 is not in the middle of an interval. It will be inserted once the leaf node is reached.
-     *                 If no split was necessary, this is null.
+     * @param insertionSize    The total size of the intervals to insert.
+     * @param splitKey         The right half of the interval that had to be split to ensure that the start position
+     *                         is not in the middle of an interval. It will be inserted once the leaf node is reached.
+     *                         If no split was necessary, this is null.
      * @return The leaf node and index, as well as the path to it, at which the intervals should be inserted.
      */
     private IndexedNodeLinkedList findInsertionPosition(IndexedNodeLinkedList indexedNode,
@@ -477,18 +477,184 @@ public class BtrfsFile {
      * Writes the given data to the given intervals and stores them in the file starting at the given start position.
      * This method will override existing data starting at the given start position.
      *
-     * @param start the start position.
+     * @param start     the start position.
      * @param intervals the intervals to write to.
-     * @param data the data to write into the storage.
+     * @param data      the data to write into the storage.
      */
     public void write(int start, List<Interval> intervals, byte[] data) {
-        // TODO
+
+        // fill the intervals with the data
+        int dataPos = 0;
+        for (Interval interval : intervals) {
+            storage.write(interval.start(), data, dataPos, interval.length());
+            dataPos += interval.length();
+        }
+
+        WriteResult result = write(start, intervals, new IndexedNodeLinkedList(null, root, 0), 0, 0, data.length, data.length);
+
+        size += result.lengthDiff;
+
+        //insert remaining intervals
+        if (!intervals.isEmpty()) {
+            // findInsertionIndex assumes that the current node is not full
+            if (root.isFull()) {
+                split(new IndexedNodeLinkedList(null, root, 0));
+            }
+
+            insert(intervals, findInsertionPosition(new IndexedNodeLinkedList(
+                null, root, 0), size, 0, getSize(intervals), null), getSize(intervals));
+        }
+    }
+
+    private record WriteResult(int removedLength, int lengthDiff) {
+    }
+
+    public WriteResult write(int start, List<Interval> intervals, IndexedNodeLinkedList indexedNode, int cumulativeLength, int removedLength, int insertionSize, int remainingLength) {
+
+        int lengthDiff = 0;
+
+        for (; indexedNode.index < indexedNode.node.size; indexedNode.index++) {
+            // before i-th key and i-th child.
+
+            // write into i-th child if start is in front of or in the i-th child, and it exists
+            if (indexedNode.node.children[indexedNode.index] != null &&
+                start < cumulativeLength + indexedNode.node.childLengths[indexedNode.index]) {
+
+                WriteResult result = write(start, intervals, new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.index], 0),
+                    cumulativeLength, removedLength, insertionSize, remainingLength);
+
+                indexedNode.node.childLengths[indexedNode.index] += result.lengthDiff;
+                removedLength += result.removedLength;
+            }
+
+
+            // check if we have written everything into the file
+            if (intervals.isEmpty()) {
+                return new WriteResult(removedLength, lengthDiff);
+            } else if (removedLength == insertionSize) {
+
+                //if we have removed as much as we can we have to insert the rest
+                insert(intervals,
+                    findInsertionPosition(indexedNode, cumulativeLength, cumulativeLength,
+                        getSize(intervals), null), getSize(intervals));
+
+                return new WriteResult(removedLength, lengthDiff);
+            }
+
+            cumulativeLength += indexedNode.node.childLengths[indexedNode.index];
+
+            Interval key = indexedNode.node.keys[indexedNode.index];
+
+            // if we would overwrite too much with the next key we have to split it
+            if (intervals.get(0).length() + removedLength > insertionSize) {
+                Interval oldInterval = intervals.remove(0);
+                int maxInsertionSize = insertionSize - removedLength;
+                Interval newLeftInterval = new Interval(oldInterval.start(), maxInsertionSize);
+                Interval newRightInterval = new Interval(oldInterval.start() + maxInsertionSize, oldInterval.length() - maxInsertionSize);
+                intervals.add(0, newRightInterval);
+                intervals.add(0, newLeftInterval);
+            }
+
+            // start is inside the i-th key
+            if (start < cumulativeLength + key.length()) {
+
+                // start is inside the i-th key, but not at the beginning
+                if (start > cumulativeLength) {
+
+                    // split the key
+                    Interval newInterval = new Interval(key.start(), key.length() - (start - cumulativeLength));
+
+                    //add new interval
+                    indexedNode.node.keys[indexedNode.index] = newInterval;
+
+                    // if we don't overwrite the whole interval we just have to insert the missing Intervals
+                    if (remainingLength < key.length() - newInterval.length()) {
+                        Interval endInterval = new Interval(newInterval.start() + newInterval.length() + insertionSize, key.length() - newInterval.length() - insertionSize);
+
+                        intervals.add(endInterval);
+
+                        insert(intervals,
+                            findInsertionPosition(indexedNode, key.start() + newInterval.length(),
+                                cumulativeLength - indexedNode.node.childLengths[indexedNode.index], getSize(intervals), null),
+                            getSize(intervals));
+
+                        return new WriteResult(removedLength, lengthDiff);
+                    }
+
+                    //otherwise we insert the end Interval
+                    Interval endInterval = new Interval(key.start() + newInterval.length(), key.length() - newInterval.length());
+                    insert(new ArrayList<>(List.of(endInterval)),
+                        findInsertionPosition(indexedNode, cumulativeLength + newInterval.length(),
+                            cumulativeLength - indexedNode.node.childLengths[indexedNode.index], endInterval.length(), null), endInterval.length());
+
+                    cumulativeLength += newInterval.length();
+                    continue;
+                }
+
+                // start is now in front of current key
+
+                // if we don't overwrite the whole interval we have to insert the end of the interval afterward
+                if (remainingLength < key.length()) {
+
+                    indexedNode.node.keys[indexedNode.index] = intervals.remove(0);
+
+                    Interval endInterval = new Interval(key.start() + remainingLength, key.length() - remainingLength);
+                    intervals.add(endInterval);
+
+                    insert(intervals,
+                        findInsertionPosition(indexedNode, cumulativeLength + remainingLength,
+                            cumulativeLength - indexedNode.node.childLengths[indexedNode.index], getSize(intervals), null),
+                        getSize(intervals));
+
+                    return new WriteResult(removedLength, lengthDiff);
+                }
+
+                //otherwise we overwrite the whole interval
+                indexedNode.node.keys[indexedNode.index] = intervals.remove(0);
+
+                removedLength += key.length();
+                lengthDiff += indexedNode.node.keys[indexedNode.index].length() - key.length();
+
+            }
+
+            cumulativeLength += key.length();
+
+            // check if we have written everything into the file
+            if (intervals.isEmpty()) {
+                return new WriteResult(removedLength, lengthDiff);
+            } else if (removedLength == insertionSize) {
+
+                //if we have removed as much as we can we have to insert the rest
+                insert(intervals,
+                    findInsertionPosition(indexedNode, cumulativeLength, cumulativeLength,
+                        getSize(intervals), null), getSize(intervals));
+
+                return new WriteResult(removedLength, lengthDiff);
+            }
+        }
+
+        // write into last child if it exists
+        if (indexedNode.node.children[indexedNode.node.size] != null) {
+            return write(start, intervals, new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.node.size], 0),
+                cumulativeLength, removedLength, insertionSize, remainingLength);
+        }
+
+        return new WriteResult(removedLength, lengthDiff);
+
+    }
+
+    private int getSize(List<Interval> intervals) {
+        int size = 0;
+        for (Interval interval : intervals) {
+            size += interval.length();
+        }
+        return size;
     }
 
     /**
      * Removes the given number of bytes starting at the given position from this file.
      *
-     * @param start the start position of the bytes to remove
+     * @param start  the start position of the bytes to remove
      * @param length the amount of bytes to remove
      */
     public void remove(int start, int length) {
@@ -506,11 +672,11 @@ public class BtrfsFile {
     /**
      * Removes the given number of bytes starting at the given position from the given node.
      *
-     * @param start the start position of the bytes to remove
-     * @param length the amount of bytes to remove
-     * @param indexedNode the current node to remove from
+     * @param start            the start position of the bytes to remove
+     * @param length           the amount of bytes to remove
+     * @param indexedNode      the current node to remove from
      * @param cumulativeLength the length of the intervals up to the current node and index
-     * @param removedLength the length of the intervals that have already been removed
+     * @param removedLength    the length of the intervals that have already been removed
      * @return the number of bytes that have been removed
      */
     private int remove(int start, int length, IndexedNodeLinkedList indexedNode, int cumulativeLength, int removedLength) {
@@ -708,7 +874,7 @@ public class BtrfsFile {
 
                         // remove the key from the merged node
                         int removedInChild = remove(start, length, new IndexedNodeLinkedList(indexedNode,
-                            indexedNode.node.children[indexedNode.index], degree - 1),
+                                indexedNode.node.children[indexedNode.index], degree - 1),
                             cumulativeLength, removedLength);
 
                         // update childLength of current node
