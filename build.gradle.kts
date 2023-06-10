@@ -9,7 +9,7 @@ plugins {
 version = file("version").readLines().first()
 
 jagr {
-    assignmentId.set("h2")
+    assignmentId.set("p2")
     submissions {
         val main by creating {
             studentId.set("ab12cdef")
@@ -20,7 +20,7 @@ jagr {
     graders {
         val graderPublic by creating {
             graderName.set("AuD-2023-P2-Public")
-            rubricProviderName.set("h2.H2_RubricProvider")
+            rubricProviderName.set("p2.P2_RubricProvider")
             configureDependencies {
                 implementation(libs.algoutils.tutor)
             }
@@ -36,10 +36,11 @@ dependencies {
     implementation(libs.annotations)
     implementation(libs.algoutils.student)
     testImplementation(libs.junit.core)
+    testImplementation(libs.junit.pioneer)
 }
 
 application {
-    mainClass.set("h2.Main")
+    mainClass.set("p2.Main")
 }
 
 tasks {
