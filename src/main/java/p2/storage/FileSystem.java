@@ -26,7 +26,7 @@ public class FileSystem {
      * The array that is used to mark intervals as used.
      * This is necessary to allocate new intervals without overwriting existing files.
      */
-    private final boolean[] used;
+    private boolean[] used;
 
     /**
      * The allocation strategy that is used to allocate new intervals.
@@ -183,7 +183,18 @@ public class FileSystem {
      * Recycles unused intervals in the storage and marks them as free.
      */
     public void garbageCollect() {
-        //TODO
+
+        boolean[] used = new boolean[storage.getSize()];
+
+        for (BtrfsFile file : files) {
+            for (Interval interval : file.readAll().getIntervals()) {
+                for (int i = interval.start(); i < interval.start() + interval.length(); i++) {
+                    used[i] = true;
+                }
+            }
+        }
+
+        this.used = used;
     }
 
     private BtrfsFile getFile(String name) {
