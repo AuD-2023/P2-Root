@@ -106,6 +106,8 @@ public class FileSystem {
         byte[] encoded = encoder.encode(data);
         List<Interval> intervals = allocator.allocate(encoded.length);
         file.write(start, intervals, encoded);
+
+        file.shrink();
     }
 
     /**

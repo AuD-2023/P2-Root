@@ -1251,7 +1251,96 @@ public class BtrfsFile {
      * If there are such intervals, they are merged into a single interval.
      */
     public void shrink() {
-        //TODO
+        shrink(new IndexedNodeLinkedList(null, root, 0));
+    }
+
+    private void shrink(IndexedNodeLinkedList indexedNode) {
+
+        for (; indexedNode.index < indexedNode.node.size; indexedNode.index++) {
+
+            if (indexedNode.node.children[indexedNode.index] != null) {
+                shrink(new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.index], 0));
+            }
+
+            // if the node is empty due to merging we can just skip it
+            if (indexedNode.node.size == 0) {
+                return;
+            }
+
+            // if we are in a node we can just remove the second interval
+            if (indexedNode.node.isLeaf()) {
+
+                //no previous interval
+                if (indexedNode.index == 0) {
+                    continue;
+                }
+
+                Interval previous = indexedNode.node.keys[indexedNode.index - 1];
+                Interval current = indexedNode.node.keys[indexedNode.index];
+
+                if (previous.start() + previous.length() == current.start()) {
+
+                    ensureSize(indexedNode);
+
+                    // merge the intervals
+                    indexedNode.node.keys[indexedNode.index - 1] = new Interval(previous.start(), previous.length() + current.length());
+
+                    // move all keys on the left one to the left
+                    System.arraycopy(indexedNode.node.keys, indexedNode.index + 1, indexedNode.node.keys, indexedNode.index, indexedNode.node.size - indexedNode.index - 1);
+
+                    // remove the last key and update size
+                    indexedNode.node.keys[indexedNode.node.size - 1] = null;
+                    indexedNode.node.size--;
+
+                    // we have to check the next interval again
+                    indexedNode.index--;
+                }
+            } else { // if we are in an inner node we have to check the leftmost key of the right child and the right most key of the left child
+
+                Interval rightMostKey = getRightMostKey(indexedNode.node.children[indexedNode.index]);
+
+                // if the right most key of the left child is adjacent to the current key we remove it and merge the intervals
+                if (rightMostKey.start() + rightMostKey.length() == indexedNode.node.keys[indexedNode.index].start()) {
+
+                    removeRightMostKey(new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.index], 0));
+
+                    indexedNode.node.childLengths[indexedNode.index] -= rightMostKey.length();
+
+                    indexedNode.node.keys[indexedNode.index] = new Interval(rightMostKey.start(), rightMostKey.length() + indexedNode.node.keys[indexedNode.index].length());
+                }
+
+                Interval leftMostKey = getLeftMostKey(indexedNode.node.children[indexedNode.index + 1]);
+
+                // if the left most key of the right child is adjacent to the current key we remove it and merge the intervals
+                if (leftMostKey.start() == indexedNode.node.keys[indexedNode.index].start() + indexedNode.node.keys[indexedNode.index].length()) {
+
+                    removeLeftMostKey(new IndexedNodeLinkedList(indexedNode, indexedNode.node.children[indexedNode.index + 1], 0));
+
+                    indexedNode.node.childLengths[indexedNode.index + 1] -= leftMostKey.length();
+
+                    indexedNode.node.keys[indexedNode.index] = new Interval(indexedNode.node.keys[indexedNode.index].start(), indexedNode.node.keys[indexedNode.index].length() + leftMostKey.length());
+                }
+            }
+
+
+        }
+
+    }
+
+    private Interval getRightMostKey(BtrfsNode node) {
+        if (node.isLeaf()) {
+            return node.keys[node.size - 1];
+        } else {
+            return getRightMostKey(node.children[node.size]);
+        }
+    }
+
+    private Interval getLeftMostKey(BtrfsNode node) {
+        if (node.isLeaf()) {
+            return node.keys[0];
+        } else {
+            return getLeftMostKey(node.children[0]);
+        }
     }
 
     /**
