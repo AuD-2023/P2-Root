@@ -51,13 +51,17 @@ public class P2_RubricProvider implements RubricProvider {
             .build();
     }
 
-    public static final Criterion H1_1 = createUntestedCriterion("Die Methode [[[read]]] funktioniert korrekt, wenn der Wurzelknoten keine Kinder hat.");
+    public static final Criterion H1_1 = createCriterion("Die Methode [[[read]]] funktioniert korrekt, wenn der Wurzelknoten keine Kinder hat.",
+        () -> ReadTests.class.getDeclaredMethod("testReadNoChildren", List.class, int.class, int.class, int.class, String.class));
 
-    public static final Criterion H1_2 = createUntestedCriterion("Die Methode [[[read]]] funktioniert korrekt, wenn nur alle Intervalle komplett gelesen werden.");
+    public static final Criterion H1_2 = createCriterion("Die Methode [[[read]]] funktioniert korrekt, wenn nur alle Intervalle komplett gelesen werden.",
+        () -> ReadTests.class.getDeclaredMethod("testReadWholeIntervals", List.class, int.class, int.class, int.class, String.class));
 
-    public static final Criterion H1_3 = createUntestedCriterion("Die Methode [[[read]]] funktioniert korrekt, wenn das Startintervall nur zum Teil gelesen wird.");
+    public static final Criterion H1_3 = createCriterion("Die Methode [[[read]]] funktioniert korrekt, wenn das Startintervall nur zum Teil gelesen wird.",
+        () -> ReadTests.class.getDeclaredMethod("testReadStartIntervalPartially", List.class, int.class, int.class, int.class, String.class));
 
-    public static final Criterion H1_4 = createUntestedCriterion("Die Methode [[[read]]] funktioniert korrekt, wenn das Start- und Endintervall nur zum Teil gelesen wird.");
+    public static final Criterion H1_4 = createCriterion("Die Methode [[[read]]] funktioniert korrekt, wenn das Start- und Endintervall nur zum Teil gelesen wird.",
+        () -> ReadTests.class.getDeclaredMethod("testReadStartAndEndIntervalPartially", List.class, int.class, int.class, int.class, String.class));
 
     public static final Criterion H1 = createParentCriterion("1", "Lesen", H1_1, H1_2, H1_3, H1_4);
 
