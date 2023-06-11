@@ -1,6 +1,7 @@
 package p2;
 
 import org.sourcegrade.jagr.api.rubric.*;
+import org.sourcegrade.jagr.api.testing.RubricConfiguration;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -178,5 +179,10 @@ public class P2_RubricProvider implements RubricProvider {
     @Override
     public Rubric getRubric() {
         return RUBRIC;
+    }
+
+    @Override
+    public void configure(RubricConfiguration configuration) {
+        configuration.addTransformer(new AccessTransformer());
     }
 }
