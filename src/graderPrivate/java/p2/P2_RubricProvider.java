@@ -103,11 +103,14 @@ public class P2_RubricProvider implements RubricProvider {
 
     public static final Criterion H2_2 = createParentCriterion("2 b)", "findInsertionPosition", H2_2_1, H2_2_2, H2_2_3, H2_2_4);
 
-    public static final Criterion H2_3_1 = createUntestedCriterion("Die Methode [[[insert]]] funktioniert korrekt, wenn alle Intervalle in den momentanen Knoten passen.");
+    public static final Criterion H2_3_1 = createCriterion("Die Methode [[[insert]]] funktioniert korrekt, wenn alle Intervalle in den momentanen Knoten passen.",
+        () -> InsertTests.class.getDeclaredMethod("testEnoughSpace", List.class, int.class, List.class, int.class, List.class));
 
-    public static final Criterion H2_3_2 = createUntestedCriterion("Die Methode [[[insert]]] funktioniert korrekt, wenn nicht alle Intervalle in den momentanen Knoten passen und nach dem Splitten aber weiterhin in den selben Knoten eingefügt wird.");
+    public static final Criterion H2_3_2 = createCriterion("Die Methode [[[insert]]] funktioniert korrekt, wenn nicht alle Intervalle in den momentanen Knoten passen und nach dem Splitten aber weiterhin in den selben Knoten eingefügt wird.",
+        () -> InsertTests.class.getDeclaredMethod("testNotEnoughSpaceSameNode", List.class, int.class, List.class, int.class, List.class));
 
-    public static final Criterion H2_3_3 = createUntestedCriterion("Die Methode [[[insert]]] funktioniert korrekt, wenn nicht alle Intervalle in den momentanen Knoten passen und nach dem Splitten in einen anderen Knoten eingefügt wird.");
+    public static final Criterion H2_3_3 = createCriterion("Die Methode [[[insert]]] funktioniert korrekt, wenn nicht alle Intervalle in den momentanen Knoten passen und nach dem Splitten in einen anderen Knoten eingefügt wird.",
+        () -> InsertTests.class.getDeclaredMethod("testNotEnoughSpaceNewNode", List.class, int.class, List.class, int.class, List.class));
 
     public static final Criterion H2_3 = createParentCriterion("2 c)", "insert", H2_3_1, H2_3_2, H2_3_3);
 

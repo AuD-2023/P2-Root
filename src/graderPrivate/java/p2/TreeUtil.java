@@ -205,10 +205,10 @@ public class TreeUtil {
         setRoot(file, root.node);
         setSize(file, root.length);
 
-        return new FileAndStorage(file, storage);
+        return new FileAndStorage(file, storage, allocator);
     }
 
-    public record FileAndStorage(BtrfsFile file, Storage storage) {
+    public record FileAndStorage(BtrfsFile file, Storage storage, AllocationStrategy allocator) {
     }
 
     public static AllocationStrategy getAllocator(FileSystem fileSystem) throws NoSuchFieldException, IllegalAccessException {
@@ -237,27 +237,29 @@ public class TreeUtil {
                 root.childLengths[root.size] = child.length;
                 length += child.length;
             } else {
-
-                String string = (String) current;
-
-                byte[] data = StringEncoder.INSTANCE.encode(string);
-
-                List<Interval> intervals = allocator.allocate(data.length);
-
-                if (intervals.size() > 1) {
-                    throw new IllegalStateException("internal Error: allocator should not return more than one interval");
-                }
-
-                storage.write(intervals.get(0).start(), data, 0, data.length);
-
-                root.keys[root.size] = intervals.get(0);
+                Interval interval = addToStorage((String) current, storage, allocator);
+                root.keys[root.size] = interval;
                 root.size++;
-                length += data.length;
+                length += interval.length();
             }
         }
 
 
         return new NodeAndLength(root, length);
+    }
+
+    public static Interval addToStorage(String string, Storage storage, AllocationStrategy allocator) {
+        byte[] data = StringEncoder.INSTANCE.encode(string);
+
+        List<Interval> intervals = allocator.allocate(data.length);
+
+        if (intervals.size() > 1) {
+            throw new IllegalStateException("internal Error: allocator should not return more than one interval");
+        }
+
+        storage.write(intervals.get(0).start(), data, 0, data.length);
+
+        return intervals.get(0);
     }
 
     private record NodeAndLength(BtrfsNode node, int length) {
