@@ -1,0 +1,239 @@
+{
+  "testNoChildNoSplitting": [
+    {
+      "tree": ["A", "B", "C", "D"],
+      "degree": 3,
+      "start": 0,
+      "insertionSize": 20,
+      "expectedIndices": [0]
+    },
+    {
+      "tree": ["A", "B", "C", "D"],
+      "degree": 3,
+      "start": 2,
+      "insertionSize": 20,
+      "expectedIndices": [2]
+    },
+    {
+      "tree": ["A", "B", "C", "D"],
+      "degree": 3,
+      "start": 4,
+      "insertionSize": 20,
+      "expectedIndices": [4]
+    },
+    {
+      "tree": ["A", "BC", "DEF", "G"],
+      "degree": 3,
+      "start": 6,
+      "insertionSize": 20,
+      "expectedIndices": [3]
+    },
+    {
+      "tree": [],
+      "degree": 3,
+      "start": 0,
+      "insertionSize": 20,
+      "expectedIndices": [0]
+    }
+  ],
+  "testWithChildNoSplitting": [
+    {
+      "tree": [["A", "BC"], "C", ["D", "E"]],
+      "degree": 3,
+      "start": 0,
+      "insertionSize": 20,
+      "expectedIndices": [0, 0]
+    },
+    {
+      "tree": [["A", "BC"], "C", ["D", "E"]],
+      "degree": 3,
+      "start": 1,
+      "insertionSize": 20,
+      "expectedIndices": [0, 1]
+    },
+    {
+      "tree": [["A", "BC"], "C", ["D", "E"]],
+      "degree": 3,
+      "start": 3,
+      "insertionSize": 20,
+      "expectedIndices": [0, 2]
+    },
+    {
+      "tree": [["A", "BC"], "C", ["DE", "F"]],
+      "degree": 3,
+      "start": 4,
+      "insertionSize": 20,
+      "expectedIndices": [1, 0]
+    },
+    {
+      "tree": [["A", "BC"], "C", ["DE", "F"]],
+      "degree": 3,
+      "start": 6,
+      "insertionSize": 20,
+      "expectedIndices": [1, 1]
+    },
+    {
+      "tree": [["A", "BC"], "C", ["DE", "F"]],
+      "degree": 3,
+      "start": 7,
+      "insertionSize": 20,
+      "expectedIndices": [1, 2]
+    },
+    {
+      "tree": [["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]],
+      "degree": 3,
+      "start": 6,
+      "insertionSize": 20,
+      "expectedIndices": [1, 1]
+    },
+    {
+      "tree": [["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]],
+      "degree": 3,
+      "start": 7,
+      "insertionSize": 20,
+      "expectedIndices": [1, 2]
+    },
+    {
+      "tree": [["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]],
+      "degree": 3,
+      "start": 10,
+      "insertionSize": 20,
+      "expectedIndices": [2, 2]
+    },
+    {
+      "tree": [[["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]], "J", [["K", "L"], "M", ["N", "O"]]],
+      "degree": 3,
+      "start": 0,
+      "insertionSize": 20,
+      "expectedIndices": [0, 0, 0]
+    },
+    {
+      "tree": [[["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]], "J", [["K", "L"], "M", ["N", "O"]]],
+      "degree": 3,
+      "start": 7,
+      "insertionSize": 20,
+      "expectedIndices": [0, 1, 2]
+    },
+    {
+      "tree": [[["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]], "J", [["K", "L"], "M", ["N", "O"]]],
+      "degree": 3,
+      "start": 10,
+      "insertionSize": 20,
+      "expectedIndices": [0, 2, 2]
+    },
+    {
+      "tree": [[["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]], "J", [["K", "L"], "M", ["N", "O"]]],
+      "degree": 3,
+      "start": 11,
+      "insertionSize": 20,
+      "expectedIndices": [1, 0, 0]
+    },
+    {
+      "tree": [[["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]], "J", [["K", "L"], "M", ["N", "O"]]],
+      "degree": 3,
+      "start": 16,
+      "insertionSize": 20,
+      "expectedIndices": [1, 1, 2]
+    }
+  ],
+  "testWithKeySplit": [
+    {
+      "tree": [["A", "B"], "CD", ["EF", "G"], "H", ["I", "J"]],
+      "degree": 3,
+      "start": 3,
+      "insertionSize": 20,
+      "expectedIndices": [1, 0],
+      "expectedTree": [["A", "B"], "C", ["D", "EF", "G"], "H", ["I", "J"]]
+    },
+    {
+      "tree": [["A", "B"], "CD", ["EF", "G", "H", "I"], "JK", ["L", "M", "N", "O"]],
+      "degree": 3,
+      "start": 10,
+      "insertionSize": 20,
+      "expectedIndices": [2, 0],
+      "expectedTree": [["A", "B"], "CD", ["EF", "G", "H", "I"], "J", ["K", "L", "M", "N", "O"]]
+    },
+    {
+      "tree": [[["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]], "JK", [["L", "M"], "N", ["O", "P"]]],
+      "degree": 3,
+      "start": 11,
+      "insertionSize": 20,
+      "expectedIndices": [1, 0, 0],
+      "expectedTree": [[["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]], "J", [["K", "L", "M"], "N", ["O", "P"]]]
+    },
+    {
+      "tree": [[["A", "B"], "CD", ["E", "F"], "G", ["H", "I"]], "JK", [["L", "M"], "N", ["O", "P"]]],
+      "degree": 3,
+      "start": 3,
+      "insertionSize": 20,
+      "expectedIndices": [0, 1, 0],
+      "expectedTree": [[["A", "B"], "C", ["D", "E", "F"], "G", ["H", "I"]], "JK", [["L", "M"], "N", ["O", "P"]]]
+    },
+    {
+      "tree": [["A", "B"], "CD", ["EF", "G", "H", "I"], "J", ["K", "L"]],
+      "degree": 3,
+      "start": 5,
+      "insertionSize": 20,
+      "expectedIndices": [1, 1],
+      "expectedTree": [["A", "B"], "CD", ["E", "F", "G", "H", "I"], "J", ["K", "L"]]
+    },
+    {
+      "tree": [["A", "B"], "CD", ["E", "F", "G", "HI"], "J", ["K", "L"]],
+      "degree": 3,
+      "start": 8,
+      "insertionSize": 20,
+      "expectedIndices": [1, 4],
+      "expectedTree": [["A", "B"], "CD", ["E", "F", "G", "H", "I"], "J", ["K", "L"]]
+    },
+    {
+      "tree": ["A", "B", "CD", "E"],
+      "degree": 3,
+      "start": 3,
+      "insertionSize": 20,
+      "expectedIndices": [3],
+      "expectedTree": ["A", "B", "C", "D", "E"]
+    },
+    {
+      "tree": ["A", "B", "C", "DE"],
+      "degree": 3,
+      "start": 4,
+      "insertionSize": 20,
+      "expectedIndices": [4],
+      "expectedTree": ["A", "B", "C", "D", "E"]
+    }
+  ],
+  "testWithLeafSplitting": [
+    {
+      "tree": [["A", "B"], "CD", ["EF", "G", "H", "I", "J"], "K", ["L", "M", "N", "O", "P"]],
+      "degree": 3,
+      "start": 3,
+      "insertionSize": 20,
+      "expectedIndices": [1, 0],
+      "expectedTree": [["A", "B"], "C", ["D", "EF", "G"], "H", ["I", "J"],  "K", ["L", "M", "N", "O", "P"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E", "FG", "H", "I"], "J", ["K", "L", "M", "N", "O"]],
+      "degree": 3,
+      "start": 6,
+      "insertionSize": 20,
+      "expectedIndices": [2, 0],
+      "expectedTree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M", "N", "O"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E", "F", "G", "HI"], "J", ["K", "L", "M", "N", "O"]],
+      "degree": 3,
+      "start": 8,
+      "insertionSize": 20,
+      "expectedIndices": [2, 2],
+      "expectedTree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M", "N", "O"]]
+    },
+    {
+      "tree": [[["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]], "JK", [["L", "M", "N", "O", "P"], "Q", ["R", "S"]]],
+      "degree": 3,
+      "start": 11,
+      "insertionSize": 20,
+      "expectedIndices": [1, 0, 0],
+      "expectedTree": [[["A", "BC"], "C", ["DE", "F"], "G", ["H", "I"]], "J", [["K", "L", "M"], "N", ["O", "P"], "Q", ["R", "S"]]]
+    }
+  ]
+}

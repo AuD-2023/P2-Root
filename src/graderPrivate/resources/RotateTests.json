@@ -1,0 +1,62 @@
+{
+  "testRotateRight": [
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 1,
+      "expected": [["A", "B"], "C", ["D", "E", "F"], "G", ["H", "I"]]
+    },
+    {
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G", "H", "I", "J"]],
+      "degree": 3,
+      "parentIndex": 0,
+      "childIndex": 2,
+      "expected": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I", "J"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E"], "FGH", ["IJ", "K", "L"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 1,
+      "expected": [["A", "B"], "C", ["D", "E", "FGH"], "IJ", ["K", "L"]]
+    },
+    {
+      "tree": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"]], "J", [["K", "L"], "M", ["N", "O"], "P", ["Q", "R", "S"], "T", ["U", "V"]]],
+      "degree": 3,
+      "parentIndex": 0,
+      "childIndex": 0,
+      "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"], "J", ["K", "L"]], "M", [["N", "O"], "P", ["Q", "R", "S"], "T", ["U", "V"]]]
+    }
+  ],
+  "testRotateLeft": [
+    {
+      "tree": [["A", "B"], "C", ["D", "E", "F"], "G", ["H", "I"]],
+      "degree": 3,
+      "parentIndex": 2,
+      "childIndex": 1,
+      "expected": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"]]
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I", "J"]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 2,
+      "expected": [["A", "B", "C", "D"], "E", ["F", "G", "H", "I", "J"]]
+    },
+    {
+      "tree": [["A", "B"], "C", ["D", "E", "FGH"], "IJ", ["K", "L"]],
+      "degree": 3,
+      "parentIndex": 2,
+      "childIndex": 1,
+      "expected": [["A", "B"], "C", ["D", "E"], "FGH", ["IJ", "K", "L"]]
+    },
+    {
+      "tree": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"], "J", ["K", "L"]], "M", [["N", "O"], "P", ["Q", "R", "S"], "T", ["U", "V"]]],
+      "degree": 3,
+      "parentIndex": 1,
+      "childIndex": 0,
+      "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"]], "J", [["K", "L"], "M", ["N", "O"], "P", ["Q", "R", "S"], "T", ["U", "V"]]]
+    }
+  ]
+}

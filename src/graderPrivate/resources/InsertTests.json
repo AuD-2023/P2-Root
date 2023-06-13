@@ -1,0 +1,99 @@
+{
+  "testEnoughSpace": [
+    {
+      "tree": ["A", "B", "C", "D"],
+      "degree": 3,
+      "intervalsToInsert": ["E"],
+      "index": 4,
+      "expected": ["A", "B", "C", "D", "E"]
+    },
+    {
+      "tree": ["A", "B", "C"],
+      "degree": 3,
+      "intervalsToInsert": ["D", "E"],
+      "index": 3,
+      "expected": ["A", "B", "C", "D", "E"]
+    },
+    {
+      "tree": ["A", "B"],
+      "degree": 3,
+      "intervalsToInsert": ["C", "D", "E"],
+      "index": 2,
+      "expected": ["A", "B", "C", "D", "E"]
+    },
+    {
+      "tree": ["A", "B", "C"],
+      "degree": 3,
+      "intervalsToInsert": ["D"],
+      "index": 3,
+      "expected": ["A", "B", "C", "D"]
+    },
+    {
+      "tree": ["A", "B", "D"],
+      "degree": 3,
+      "intervalsToInsert": ["C"],
+      "index": 2,
+      "expected": ["A", "B", "C", "D"]
+    },
+    {
+      "tree": ["A", "B", "D", "E"],
+      "degree": 3,
+      "intervalsToInsert": ["C"],
+      "index": 2,
+      "expected": ["A", "B", "C", "D", "E"]
+    }
+  ],
+  "testNotEnoughSpaceSameNode": [
+    {
+      "tree": ["A", "C", "D", "E", "F"],
+      "degree": 3,
+      "intervalsToInsert": ["B"],
+      "index": 1,
+      "expected": [["A", "B", "C"], "D", ["E", "F"]]
+    },
+    {
+      "tree": ["B", "C", "D", "E", "F"],
+      "degree": 3,
+      "intervalsToInsert": ["A"],
+      "index": 0,
+      "expected": [["A", "B", "C"], "D", ["E", "F"]]
+    },
+    {
+      "tree": ["A", "B", "D", "E", "F"],
+      "degree": 3,
+      "intervalsToInsert": ["C"],
+      "index": 2,
+      "expected": [["A", "B", "C"], "D", ["E", "F"]]
+    }
+  ],
+  "testNotEnoughSpaceNewNode": [
+    {
+      "tree": ["A", "B", "C", "E", "F"],
+      "degree": 3,
+      "intervalsToInsert": ["D"],
+      "index": 3,
+      "expected": [["A", "B"], "C", ["D", "E", "F"]]
+    },
+    {
+      "tree": ["A", "B", "C", "D", "F"],
+      "degree": 3,
+      "intervalsToInsert": ["E"],
+      "index": 4,
+      "expected": [["A", "B"], "C", ["D", "E", "F"]]
+    },
+    {
+      "tree": ["A", "B", "C", "D", "J"],
+      "degree": 3,
+      "intervalsToInsert": ["E", "F", "G", "H", "I"],
+      "index": 4,
+      "expected": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I", "J"]]
+    },
+    {
+      "tree": ["A", "G", "H", "I", "J"],
+      "degree": 3,
+      "intervalsToInsert": ["B", "C", "D", "E", "F"],
+      "index": 1,
+      "expected": [["A", "B"], "C", ["D", "E", "F", "G"], "H", ["I", "J"]]
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "testReadNoChildren": [
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "start": 0,
+      "length": 5,
+      "expected": "ABCDE"
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "start": 1,
+      "length": 4,
+      "expected": "BCDE"
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "start": 1,
+      "length": 3,
+      "expected": "BCD"
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "start": 2,
+      "length": 1,
+      "expected": "C"
+    },
+    {
+      "tree": ["A", "B", "C", "D"],
+      "degree": 3,
+      "start": 0,
+      "length": 4,
+      "expected": "ABCD"
+    },
+    {
+      "tree": ["A", "B", "C", "D"],
+      "degree": 3,
+      "start": 1,
+      "length": 3,
+      "expected": "BCD"
+    },
+    {
+      "tree": ["A", "B", "C", "D"],
+      "degree": 3,
+      "start": 1,
+      "length": 2,
+      "expected": "BC"
+    },
+    {
+      "tree": ["A", "B", "C", "D"],
+      "degree": 3,
+      "start": 1,
+      "length": 1,
+      "expected": "B"
+    }
+  ],
+  "testReadWholeIntervals": [
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"]],
+      "degree": 3,
+      "start": 0,
+      "length": 9,
+      "expected": "ABCDEFGHI"
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M"]],
+      "degree": 3,
+      "start": 0,
+      "length": 13,
+      "expected": "ABCDEFGHIJKLM"
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M"]],
+      "degree": 3,
+      "start": 1,
+      "length": 3,
+      "expected": "BCD"
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M"]],
+      "degree": 3,
+      "start": 5,
+      "length": 1,
+      "expected": "F"
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M"]],
+      "degree": 3,
+      "start": 6,
+      "length": 3,
+      "expected": "GHI"
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M"]],
+      "degree": 3,
+      "start": 4,
+      "length": 2,
+      "expected": "EF"
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M"]],
+      "degree": 3,
+      "start": 5,
+      "length": 2,
+      "expected": "FG"
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M"]],
+      "degree": 3,
+      "start": 2,
+      "length": 8,
+      "expected": "CDEFGHIJ"
+    },
+    {
+      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M"]],
+      "degree": 3,
+      "start": 2,
+      "length": 9,
+      "expected": "CDEFGHIJK"
+    },
+    {
+      "tree": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"], "J", ["K", "L"]], "M", [["N", "O"], "P", ["Q", "R", "S"], "T", ["U", "V"]]],
+      "degree": 3,
+      "start": 4,
+      "length": 14,
+      "expected": "EFGHIJKLMNOPQR"
+    }
+  ],
+  "testReadStartIntervalPartially": [
+    {
+      "tree": ["A", "BC", "D", "E", "F"],
+      "degree": 3,
+      "start": 2,
+      "length": 3,
+      "expected": "CDE"
+    },
+    {
+      "tree": ["A", "B", "CDEFG", "H", "I"],
+      "degree": 3,
+      "start": 4,
+      "length": 4,
+      "expected": "EFGH"
+    }
+  ],
+  "testReadStartAndEndIntervalPartially": [
+    {
+      "tree": ["A", "BC", "D", "EF", "G"],
+      "degree": 3,
+      "start": 2,
+      "length": 3,
+      "expected": "CDE"
+    },
+    {
+      "tree": ["A", "B", "CDEFG", "HIJKL", "M"],
+      "degree": 3,
+      "start": 4,
+      "length": 7,
+      "expected": "EFGHIJK"
+    }
+  ]
+}
