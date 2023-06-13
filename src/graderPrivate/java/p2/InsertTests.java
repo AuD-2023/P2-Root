@@ -6,11 +6,9 @@ import org.junitpioneer.jupiter.json.Property;
 import org.sourcegrade.jagr.api.rubric.TestForSubmission;
 import org.tudalgo.algoutils.tutor.general.assertions.Context;
 import p2.btrfs.BtrfsFile;
-import p2.btrfs.BtrfsNode;
 import p2.btrfs.IndexedNodeLinkedList;
 import p2.storage.Interval;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,7 +28,7 @@ public class InsertTests {
                                 @Property("intervalsToInsert") List<String> intervalsToInsert,
                                 @Property("index") int index,
                                 @Property("expected") List<Object> expected) throws Throwable {
-        testRead(tree, degree, intervalsToInsert, index, expected, -1);
+        testInsert(tree, degree, intervalsToInsert, index, expected);
     }
 
     @ParameterizedTest
@@ -40,7 +38,7 @@ public class InsertTests {
                                 @Property("intervalsToInsert") List<String> intervalsToInsert,
                                 @Property("index") int index,
                                 @Property("expected") List<Object> expected) throws Throwable {
-        testRead(tree, degree, intervalsToInsert, index, expected, 0);
+        testInsert(tree, degree, intervalsToInsert, index, expected);
     }
 
     @ParameterizedTest
@@ -50,15 +48,14 @@ public class InsertTests {
                                            @Property("intervalsToInsert") List<String> intervalsToInsert,
                                            @Property("index") int index,
                                            @Property("expected") List<Object> expected) throws Throwable {
-        testRead(tree, degree, intervalsToInsert, index, expected, 0);
+        testInsert(tree, degree, intervalsToInsert, index, expected);
     }
 
-    private void testRead(List<Object> tree,
-                          int degree,
-                          List<String> intervalsToInsert,
-                          int index,
-                          List<Object> expected,
-                          int indexToIncrease) throws Throwable {
+    private void testInsert(List<Object> tree,
+                            int degree,
+                            List<String> intervalsToInsert,
+                            int index,
+                            List<Object> expected) throws Throwable {
 
         Context.Builder<?> context = contextBuilder()
             .subject("BtrfsFile.insert()")
@@ -73,7 +70,6 @@ public class InsertTests {
 
         overrideSplit(actualTree);
 
-
         TreeUtil.FileAndStorage expectedFileAndStorage = constructTree(expected, degree);
         BtrfsFile expectedTree = expectedFileAndStorage.file();
 
@@ -87,10 +83,6 @@ public class InsertTests {
 
         call(() -> callInsert(actualTree, new ArrayList<>(intervals), new IndexedNodeLinkedList(null, getRoot(actualTree), index)), context.build(),
             TR -> "BtrfsFile.insert() should not throw an exception.");
-
-        if (indexToIncrease != -1) {
-            //increaseChildLength(getRoot(actualTree), indexToIncrease, getSize(intervals));
-        }
 
         assertTreeEquals(context.build(), "The tree is not correct.",
             getRoot(expectedTree), getRoot(actualTree),
@@ -118,13 +110,6 @@ public class InsertTests {
             size += interval.length();
         }
         return size;
-    }
-
-    private void increaseChildLength(BtrfsNode node, int index, int increase) throws NoSuchFieldException, IllegalAccessException {
-        Field childLengthField = BtrfsNode.class.getDeclaredField("childLengths");
-        childLengthField.setAccessible(true);
-        int[] childLengths = (int[]) childLengthField.get(node);
-        childLengths[index] += increase;
     }
 
 }
