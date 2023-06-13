@@ -3,7 +3,7 @@
     {
       "tree": [
         [
-          "Z",
+          "A",
           "B",
           "C",
           "D",
@@ -23,7 +23,7 @@
       "childIndex": 1,
       "expected": [
         [
-          "Z",
+          "A",
           "B",
           "C",
           "D",
@@ -166,7 +166,7 @@
     {
       "tree": [
         [
-          "Z",
+          "A",
           "B",
           "C",
           "D",
@@ -282,40 +282,16 @@
       "childIndex": 4,
       "expectedParentIndex": 2,
       "expectedChildIndex": 1
-    },
-    {
-      "tree": [
-        [
-          "A",
-          "B",
-          "C",
-          "D",
-          "E"
-        ],
-        "F",
-        [
-          "G",
-          "H",
-          "I",
-          "J",
-          "K"
-        ]
-      ],
-      "degree": 3,
-      "parentIndex": 1,
-      "childIndex": 5,
-      "expectedParentIndex": 2,
-      "expectedChildIndex": 2
     }
   ],
   "testSplitRoot": [
     {
-      "tree": ["Z", "B", "C", "D", "E"],
+      "tree": ["A", "B", "C", "D", "E"],
       "degree": 3,
       "index": 0,
       "expectedParentIndex": 0,
       "expectedChildIndex": 0,
-      "expected": [["Z", "B"], "C", ["D", "E"]]
+      "expected": [["A", "B"], "C", ["D", "E"]]
     },
     {
       "tree": ["A", "B", "C", "D", "E"],
@@ -350,14 +326,6 @@
       "expected": [["A", "B"], "C", ["D", "E"]]
     },
     {
-      "tree": ["A", "B", "C", "D", "E"],
-      "degree": 3,
-      "index": 5,
-      "expectedParentIndex": 1,
-      "expectedChildIndex": 2,
-      "expected": [["A", "B"], "C", ["D", "E"]]
-    },
-    {
       "tree": ["AB", "CD", "EF", "GH", "IJ"],
       "degree": 3,
       "index": 4,
@@ -376,7 +344,7 @@
   ],
   "testSplitRecursive": [
     {
-      "tree": [["ZB", "CD", "EF", "GH", "IJ"], "KL", ["MN", "OP"], "QR", ["ST", "UV"], "WX", ["YZ", "ab"], "cd", ["ef", "gh"], "ij", ["kl", "mn"]],
+      "tree": [["AB", "CD", "EF", "GH", "IJ"], "KL", ["MN", "OP"], "QR", ["ST", "UV"], "WX", ["YZ", "ab"], "cd", ["ef", "gh"], "ij", ["kl", "mn"]],
       "degree": 3,
       "index": 0,
       "parentIndex": 0,
@@ -384,7 +352,7 @@
       "expectedGrandParentIndex": 0,
       "expectedParentIndex": 0,
       "expectedChildIndex": 0,
-      "expected": [[["ZB", "CD"], "EF", ["GH", "IJ"], "KL", ["MN", "OP"], "QR", ["ST", "UV"]], "WX", [["YZ", "ab"], "cd", ["ef", "gh"], "ij", ["kl", "mn"]]]
+      "expected": [[["AB", "CD"], "EF", ["GH", "IJ"], "KL", ["MN", "OP"], "QR", ["ST", "UV"]], "WX", [["YZ", "ab"], "cd", ["ef", "gh"], "ij", ["kl", "mn"]]]
     },
     {
       "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"], "I", ["J", "K", "L", "M", "N"], "O", ["P", "Q"], "R", ["S", "T"]],

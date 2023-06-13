@@ -85,6 +85,9 @@ public class TreeUtil {
             expectedStorage.read(expectedNode.keys[i].start(), expectedBytes, 0, expectedNode.keys[i].length());
             String expectedString = StringEncoder.INSTANCE.decode(expectedBytes);
 
+            assertNotNull(actualNode.keys[i], context, TR -> message + " The key at index %d of the node %s should not be <null>"
+                .formatted(finalI, treeToString(actualNode, actualStorage)));
+
             byte[] actualBytes = new byte[actualNode.keys[i].length()];
             actualStorage.read(actualNode.keys[i].start(), actualBytes, 0, actualNode.keys[i].length());
             String actualString = StringEncoder.INSTANCE.decode(actualBytes);
@@ -129,10 +132,18 @@ public class TreeUtil {
     }
 
     private static void treeToString(BtrfsNode node, Storage storage, StringBuilder builder) {
-        builder.append("[");
+        builder.append("{");
         for (int i = 0; i < node.size; i++) {
             if (node.children[i] != null) {
+                if (i > 0) {
+                    builder.append(",");
+                }
+
                 treeToString(node.children[i], storage, builder);
+            }
+
+            if (i > 0 || node.children[0] != null) {
+                builder.append(",");
             }
 
             if (node.keys[i] != null) {
@@ -140,17 +151,16 @@ public class TreeUtil {
             } else {
                 builder.append("<null>");
             }
-
-            if (i < node.size - 1) {
-                builder.append(",");
-            }
         }
 
         if (node.children[node.size] != null) {
+            if (node.size > 0) {
+                builder.append(",");
+            }
             treeToString(node.children[node.size], storage, builder);
         }
 
-        builder.append("]");
+        builder.append("}");
     }
 
     public static String treeToString(List<Object> tree) {

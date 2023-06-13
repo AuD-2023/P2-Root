@@ -1,10 +1,10 @@
 {
   "testRemoveRightLeaf": [
     {
-      "tree": ["Z", "B", "C", "D", "E"],
+      "tree": ["A", "B", "C", "D", "E"],
       "degree": 3,
       "key": "E",
-      "expected": ["Z", "B", "C", "D"]
+      "expected": ["A", "B", "C", "D"]
     },
     {
       "tree": ["A", "B", "C"],
@@ -21,10 +21,10 @@
   ],
   "testRemoveRightNoCorrection": [
     {
-      "tree": [["Z", "B", "C", "D"], "E", ["F", "G", "H", "I"]],
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G", "H", "I"]],
       "degree": 3,
       "key": "I",
-      "expected": [["Z", "B", "C", "D"], "E", ["F", "G", "H"]]
+      "expected": [["A", "B", "C", "D"], "E", ["F", "G", "H"]]
     },
     {
       "tree": [["A", "B", "C", "D"], "E", ["F", "G", "H", "IJ"]],
@@ -41,10 +41,10 @@
   ],
   "testRemoveRightWithCorrection": [
     {
-      "tree": [["Z", "B", "C", "D"], "E", ["F", "G"]],
+      "tree": [["A", "B", "C", "D"], "E", ["F", "G"]],
       "degree": 3,
       "key": "G",
-      "expected": [["Z", "B", "C"], "D", ["E", "F"]]
+      "expected": [["A", "B", "C"], "D", ["E", "F"]]
     },
     {
       "tree": [["A", "B", "C", "D"], "E", ["F", "GH"]],
@@ -61,9 +61,9 @@
   ],
   "testRemoveLeft": [
     {
-      "tree": ["Z", "B", "C", "D", "E"],
+      "tree": ["A", "B", "C", "D", "E"],
       "degree": 3,
-      "key": "Z",
+      "key": "A",
       "expected": ["B", "C", "D", "E"]
     },
     {

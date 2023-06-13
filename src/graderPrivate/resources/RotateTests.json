@@ -1,11 +1,11 @@
 {
   "testRotateRight": [
     {
-      "tree": [["Z", "B"], "C", ["D", "E"], "F", ["G", "H", "I"]],
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"]],
       "degree": 3,
       "parentIndex": 1,
       "childIndex": 1,
-      "expected": [["Z", "B"], "C", ["D", "E", "F"], "G", ["H", "I"]]
+      "expected": [["A", "B"], "C", ["D", "E", "F"], "G", ["H", "I"]]
     },
     {
       "tree": [["A", "B", "C", "D"], "E", ["F", "G", "H", "I", "J"]],
@@ -31,11 +31,11 @@
   ],
   "testRotateLeft": [
     {
-      "tree": [["Z", "B"], "C", ["D", "E", "F"], "G", ["H", "I"]],
+      "tree": [["A", "B"], "C", ["D", "E", "F"], "G", ["H", "I"]],
       "degree": 3,
       "parentIndex": 2,
       "childIndex": 1,
-      "expected": [["Z", "B"], "C", ["D", "E"], "F", ["G", "H", "I"]]
+      "expected": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"]]
     },
     {
       "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I", "J"]],

@@ -1,11 +1,11 @@
 {
   "testMergeRight": [
     {
-      "tree": [["Z", "B"], "C", ["D", "E"], "F", ["G", "H"]],
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"]],
       "degree": 3,
       "parentIndex": 1,
       "childIndex": 1,
-      "expected": [["Z", "B"], "C", ["D", "E", "F", "G", "H"]]
+      "expected": [["A", "B"], "C", ["D", "E", "F", "G", "H"]]
     },
     {
       "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I", "J", "K"]],
@@ -45,13 +45,13 @@
   ],
   "testMergeLeft": [
     {
-      "tree": [["Z", "B"], "C", ["D", "E"], "F", ["G", "H"]],
+      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H"]],
       "degree": 3,
       "parentIndex": 2,
       "childIndex": 1,
       "expectedParentIndex": 1,
       "expectedChildIndex": 4,
-      "expected": [["Z", "B"], "C", ["D", "E", "F", "G", "H"]]
+      "expected": [["A", "B"], "C", ["D", "E", "F", "G", "H"]]
     },
     {
       "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I", "J", "K"]],
