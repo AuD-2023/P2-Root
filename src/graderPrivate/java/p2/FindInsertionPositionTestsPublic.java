@@ -26,7 +26,7 @@ import static p2.TreeUtil.getRoot;
 import static p2.TreeUtil.treeToString;
 
 @TestForSubmission
-public class FindInsertionPositionTests {
+public class FindInsertionPositionTestsPublic {
 
     @ParameterizedTest
     @JsonClasspathSource(value = "FindInsertionPositionTests.json", data = "testNoChildNoSplitting")
@@ -97,7 +97,7 @@ public class FindInsertionPositionTests {
         BtrfsFile expectedTree = expectedFileAndStorage.file();
 
         IndexedNodeLinkedList actualIndexedNode = callObject(() -> callFindInsertionPosition(
-            actualTree, new IndexedNodeLinkedList(null, getRoot(actualTree), 0), start, insertionSize),
+                actualTree, new IndexedNodeLinkedList(null, getRoot(actualTree), 0), start, insertionSize),
             context.build(), TR -> "findInsertionPosition() should not throw an exception");
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));

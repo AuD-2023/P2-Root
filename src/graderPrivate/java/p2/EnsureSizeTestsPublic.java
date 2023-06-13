@@ -13,17 +13,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.*;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertEquals;
-import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.call;
-import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.contextBuilder;
-import static p2.TreeUtil.assertTreeEquals;
-import static p2.TreeUtil.constructTree;
+import static p2.TreeUtil.*;
 import static p2.TreeUtil.getRoot;
-import static p2.TreeUtil.treeToString;
 
-@SuppressWarnings("DuplicatedCode")
 @TestForSubmission
-public class EnsureSizeTests {
+public class EnsureSizeTestsPublic {
 
     @ParameterizedTest
     @JsonClasspathSource(value = "EnsureSizeTests.json", data = "testNoChange")
@@ -69,7 +65,7 @@ public class EnsureSizeTests {
                                @Property("childIndex") int childIndex,
                                @Property("expectedParentIndex") int expectedParentIndex,
                                @Property("expectedChildIndex1") int expectedChildIndex1,
-                                 @Property("expectedChildIndex2") int expectedChildIndex2,
+                               @Property("expectedChildIndex2") int expectedChildIndex2,
                                @Property("expected1") List<Object> expected1,
                                @Property("expected2") List<Object> expected2) throws Throwable {
 
@@ -154,7 +150,6 @@ public class EnsureSizeTests {
         TreeUtil.FileAndStorage actualFileAndStorage = constructTree(tree, degree);
         BtrfsFile actualTree = actualFileAndStorage.file();
         BtrfsNode root = getRoot(actualTree);
-        BtrfsNode child = childIndex == -1 ? null : root.children[parentIndex];
         int initialSize = actualTree.getSize();
 
         IndexedNodeLinkedList indexedRoot = new IndexedNodeLinkedList(null, root, parentIndex);
@@ -208,7 +203,7 @@ public class EnsureSizeTests {
         if (indexedChild != null) {
             assertEquals(matchingTreeIndex == 0 ? expectedChildIndex1 : expectedChildIndex2, indexedChild.index, context.build(),
                 TR -> "The index of the child is not correct");
-            assertEquals(child, indexedChild.node, context.build(),
+            assertEquals(root.children[matchingTreeIndex == 0 ? expectedParentIndex1 : expectedParentIndex2], indexedChild.node, context.build(),
                 TR -> "The node of the child should not change");
             assertEquals(indexedRoot, indexedChild.parent, context.build(),
                 TR -> "The parent of the child should not change");

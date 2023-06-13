@@ -16,15 +16,11 @@ import java.util.List;
 
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.callObject;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.contextBuilder;
-import static p2.TreeUtil.assertIntervalEquals;
-import static p2.TreeUtil.assertTreeEquals;
-import static p2.TreeUtil.constructTree;
+import static p2.TreeUtil.*;
 import static p2.TreeUtil.getRoot;
-import static p2.TreeUtil.treeToString;
 
-@SuppressWarnings("DuplicatedCode")
 @TestForSubmission
-public class RemoveLRMostKeyTests {
+public class RemoveLRMostKeyTestsPublic {
 
     @ParameterizedTest
     @JsonClasspathSource(value = "RemoveLRMostKeyTests.json", data = "testRemoveRightLeaf")
@@ -38,27 +34,27 @@ public class RemoveLRMostKeyTests {
     @ParameterizedTest
     @JsonClasspathSource(value = "RemoveLRMostKeyTests.json", data = "testRemoveRightNoCorrection")
     public void testRemoveRightNoCorrection(@Property("tree") List<Object> tree,
-                                    @Property("degree") int degree,
-                                    @Property("key") String key,
-                                    @Property("expected") List<Object> expected) throws Throwable {
+                                            @Property("degree") int degree,
+                                            @Property("key") String key,
+                                            @Property("expected") List<Object> expected) throws Throwable {
         testRemoveLRMostKey(tree, degree, key, expected, true);
     }
 
     @ParameterizedTest
     @JsonClasspathSource(value = "RemoveLRMostKeyTests.json", data = "testRemoveRightWithCorrection")
     public void testRemoveRightWithCorrection(@Property("tree") List<Object> tree,
-                                            @Property("degree") int degree,
-                                            @Property("key") String key,
-                                            @Property("expected") List<Object> expected) throws Throwable {
+                                              @Property("degree") int degree,
+                                              @Property("key") String key,
+                                              @Property("expected") List<Object> expected) throws Throwable {
         testRemoveLRMostKey(tree, degree, key, expected, true);
     }
 
     @ParameterizedTest
     @JsonClasspathSource(value = "RemoveLRMostKeyTests.json", data = "testRemoveLeft")
     public void testRemoveLeft(@Property("tree") List<Object> tree,
-                                            @Property("degree") int degree,
-                                            @Property("key") String key,
-                                            @Property("expected") List<Object> expected) throws Throwable {
+                               @Property("degree") int degree,
+                               @Property("key") String key,
+                               @Property("expected") List<Object> expected) throws Throwable {
         testRemoveLRMostKey(tree, degree, key, expected, false);
     }
 

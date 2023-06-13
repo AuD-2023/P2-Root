@@ -4,6 +4,7 @@ import org.sourcegrade.jagr.api.rubric.*;
 import org.sourcegrade.jagr.api.testing.RubricConfiguration;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -22,7 +23,12 @@ public class P2_RubricProvider implements RubricProvider {
     @SafeVarargs
     private static Criterion createCriterion(String shortDescription, Callable<Method>... methodReferences) {
 
-        if (methodReferences.length == 0) {
+        return createCriterion(shortDescription, Arrays.stream(methodReferences).map(JUnitTestRef::ofMethod).toArray(JUnitTestRef[]::new));
+    }
+
+    private static Criterion createCriterion(String shortDescription, JUnitTestRef... testReferences) {
+
+        if (testReferences.length == 0) {
             return Criterion.builder()
                 .shortDescription(shortDescription)
                 .maxPoints(1)
@@ -31,8 +37,8 @@ public class P2_RubricProvider implements RubricProvider {
 
         Grader.TestAwareBuilder graderBuilder = Grader.testAwareBuilder();
 
-        for (Callable<Method> reference : methodReferences) {
-            graderBuilder.requirePass(JUnitTestRef.ofMethod(reference));
+        for (JUnitTestRef reference : testReferences) {
+            graderBuilder.requirePass(reference);
         }
 
         return Criterion.builder()
@@ -84,33 +90,59 @@ public class P2_RubricProvider implements RubricProvider {
     public static final Criterion H2_1 = createParentCriterion("2 a)", "Split", H2_1_1, H2_1_2, H2_1_3, H2_1_4);
 
     public static final Criterion H2_2_1 = createCriterion("Die Methode [[[findInsertionPosition]]] funktioniert korrekt, wenn der WurzelKnoten keine Kinder hat und kein Intervall aufgeteilt werden muss.",
-        () -> FindInsertionPositionTests.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTests.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTestsPublic.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class))));
 
     public static final Criterion H2_2_2 = createCriterion("Die Methode [[[findInsertionPosition]]] funktioniert zusätzlich korrekt, wenn der Wurzelknoten Kinder hat und kein Intervall aufgeteilt werden muss.",
-        () -> FindInsertionPositionTests.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class),
-        () -> FindInsertionPositionTests.class.getDeclaredMethod("testWithChildNoSplitting", List.class, int.class, int.class, int.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTests.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTestsPublic.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class))),
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTests.class.getDeclaredMethod("testWithChildNoSplitting", List.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTestsPublic.class.getDeclaredMethod("testWithChildNoSplitting", List.class, int.class, int.class, int.class, List.class))));
 
     public static final Criterion H2_2_3 = createCriterion("Die Methode [[[findInsertionPosition]]] funktioniert zusätzlich korrekt, wenn Intervalle aufgeteilt werden müssen, aber der Blattknoten nicht voll ist.",
-        () -> FindInsertionPositionTests.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class),
-        () -> FindInsertionPositionTests.class.getDeclaredMethod("testWithChildNoSplitting", List.class, int.class, int.class, int.class, List.class),
-        () -> FindInsertionPositionTests.class.getDeclaredMethod("testWithKeySplitting", List.class, int.class, int.class, int.class, List.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTests.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTestsPublic.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class))),
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTests.class.getDeclaredMethod("testWithChildNoSplitting", List.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTestsPublic.class.getDeclaredMethod("testWithChildNoSplitting", List.class, int.class, int.class, int.class, List.class))),
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTests.class.getDeclaredMethod("testWithKeySplitting", List.class, int.class, int.class, int.class, List.class, List.class)),
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTestsPublic.class.getDeclaredMethod("testWithKeySplitting", List.class, int.class, int.class, int.class, List.class, List.class))));
 
     public static final Criterion H2_2_4 = createCriterion("Die Methode [[[findInsertionPosition]]] funktioniert zusätzlich korrekt, wenn Intervalle aufgeteilt werden müssen und der Blattknoten voll ist.",
-        () -> FindInsertionPositionTests.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class),
-        () -> FindInsertionPositionTests.class.getDeclaredMethod("testWithChildNoSplitting", List.class, int.class, int.class, int.class, List.class),
-        () -> FindInsertionPositionTests.class.getDeclaredMethod("testWithKeySplitting", List.class, int.class, int.class, int.class, List.class, List.class),
-        () -> FindInsertionPositionTests.class.getDeclaredMethod("testWithLeafSplitting", List.class, int.class, int.class, int.class, List.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTests.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTestsPublic.class.getDeclaredMethod("testNoChildNoSplitting", List.class, int.class, int.class, int.class, List.class))),
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTests.class.getDeclaredMethod("testWithChildNoSplitting", List.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTestsPublic.class.getDeclaredMethod("testWithChildNoSplitting", List.class, int.class, int.class, int.class, List.class))),
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTests.class.getDeclaredMethod("testWithKeySplitting", List.class, int.class, int.class, int.class, List.class, List.class)),
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTestsPublic.class.getDeclaredMethod("testWithKeySplitting", List.class, int.class, int.class, int.class, List.class, List.class))),
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTests.class.getDeclaredMethod("testWithLeafSplitting", List.class, int.class, int.class, int.class, List.class, List.class)),
+            JUnitTestRef.ofMethod(() -> FindInsertionPositionTestsPublic.class.getDeclaredMethod("testWithLeafSplitting", List.class, int.class, int.class, int.class, List.class, List.class))));
 
     public static final Criterion H2_2 = createParentCriterion("2 b)", "findInsertionPosition", H2_2_1, H2_2_2, H2_2_3, H2_2_4);
 
     public static final Criterion H2_3_1 = createCriterion("Die Methode [[[insert]]] funktioniert korrekt, wenn alle Intervalle in den momentanen Knoten passen.",
-        () -> InsertTests.class.getDeclaredMethod("testEnoughSpace", List.class, int.class, List.class, int.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> InsertTests.class.getDeclaredMethod("testEnoughSpace", List.class, int.class, List.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> InsertTestsPublic.class.getDeclaredMethod("testEnoughSpace", List.class, int.class, List.class, int.class, List.class))));
 
     public static final Criterion H2_3_2 = createCriterion("Die Methode [[[insert]]] funktioniert korrekt, wenn nicht alle Intervalle in den momentanen Knoten passen und nach dem Splitten aber weiterhin in den selben Knoten eingefügt wird.",
-        () -> InsertTests.class.getDeclaredMethod("testNotEnoughSpaceSameNode", List.class, int.class, List.class, int.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> InsertTests.class.getDeclaredMethod("testNotEnoughSpaceSameNode", List.class, int.class, List.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> InsertTestsPublic.class.getDeclaredMethod("testNotEnoughSpaceSameNode", List.class, int.class, List.class, int.class, List.class))));
 
     public static final Criterion H2_3_3 = createCriterion("Die Methode [[[insert]]] funktioniert korrekt, wenn nicht alle Intervalle in den momentanen Knoten passen und nach dem Splitten in einen anderen Knoten eingefügt wird.",
-        () -> InsertTests.class.getDeclaredMethod("testNotEnoughSpaceNewNode", List.class, int.class, List.class, int.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> InsertTests.class.getDeclaredMethod("testNotEnoughSpaceNewNode", List.class, int.class, List.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> InsertTestsPublic.class.getDeclaredMethod("testNotEnoughSpaceNewNode", List.class, int.class, List.class, int.class, List.class))));
 
     public static final Criterion H2_3 = createParentCriterion("2 c)", "insert", H2_3_1, H2_3_2, H2_3_3);
 
@@ -142,33 +174,55 @@ public class P2_RubricProvider implements RubricProvider {
     public static final Criterion H3_2 = createParentCriterion("3 b)", "Mergen", H3_2_1, H3_2_2, H3_2_3);
 
     public static final Criterion H3_3_1 = createCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt, wenn rotateFromRightSibling aufgerufen werden muss.",
-        () -> EnsureSizeTests.class.getDeclaredMethod("testRotateRight", List.class, int.class, int.class, int.class, int.class, int.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> EnsureSizeTests.class.getDeclaredMethod("testRotateRight", List.class, int.class, int.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> EnsureSizeTestsPublic.class.getDeclaredMethod("testRotateRight", List.class, int.class, int.class, int.class, int.class, int.class, List.class))));
 
     public static final Criterion H3_3_2 = createCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt, wenn rotateFromLeftSibling aufgerufen werden muss, oder beide aufgerufen werden können.",
-        () -> EnsureSizeTests.class.getDeclaredMethod("testRotateLeft", List.class, int.class, int.class, int.class, int.class, int.class, List.class),
-        () -> EnsureSizeTests.class.getDeclaredMethod("testRotateBoth", List.class, int.class, int.class, int.class, int.class, int.class, int.class, List.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> EnsureSizeTests.class.getDeclaredMethod("testRotateLeft", List.class, int.class, int.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> EnsureSizeTestsPublic.class.getDeclaredMethod("testRotateLeft", List.class, int.class, int.class, int.class, int.class, int.class, List.class))),
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> EnsureSizeTests.class.getDeclaredMethod("testRotateBoth", List.class, int.class, int.class, int.class, int.class, int.class, int.class, List.class, List.class)),
+            JUnitTestRef.ofMethod(() -> EnsureSizeTestsPublic.class.getDeclaredMethod("testRotateBoth", List.class, int.class, int.class, int.class, int.class, int.class, int.class, List.class, List.class))));
 
     public static final Criterion H3_3_3 = createCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt, wenn mergeWithRightSibling aufgerufen werden muss.",
-        () -> EnsureSizeTests.class.getDeclaredMethod("testMergeRight", List.class, int.class, int.class, int.class, int.class, int.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> EnsureSizeTests.class.getDeclaredMethod("testMergeRight", List.class, int.class, int.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> EnsureSizeTestsPublic.class.getDeclaredMethod("testMergeRight", List.class, int.class, int.class, int.class, int.class, int.class, List.class))));
 
     public static final Criterion H3_3_4 = createCriterion("Die Methode [[[ensureSize]]] funktioniert korrekt, wenn mergeWithLeftSibling aufgerufen werden kann, beide Methoden aufgerufen werden können, oder gar keine Methode aufgerufen werden muss.",
-        () -> EnsureSizeTests.class.getDeclaredMethod("testMergeLeft", List.class, int.class, int.class, int.class, int.class, int.class, List.class),
-        () -> EnsureSizeTests.class.getDeclaredMethod("testMergeBoth", List.class, int.class, int.class, int.class, int.class, int.class, int.class, int.class, List.class, List.class),
-        () -> EnsureSizeTests.class.getDeclaredMethod("testNoChange", List.class, int.class, int.class, int.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> EnsureSizeTests.class.getDeclaredMethod("testMergeLeft", List.class, int.class, int.class, int.class, int.class, int.class, List.class)),
+            JUnitTestRef.ofMethod(() -> EnsureSizeTestsPublic.class.getDeclaredMethod("testMergeLeft", List.class, int.class, int.class, int.class, int.class, int.class, List.class))),
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> EnsureSizeTests.class.getDeclaredMethod("testMergeBoth", List.class, int.class, int.class, int.class, int.class, int.class, int.class, int.class, List.class, List.class)),
+            JUnitTestRef.ofMethod(() -> EnsureSizeTestsPublic.class.getDeclaredMethod("testMergeBoth", List.class, int.class, int.class, int.class, int.class, int.class, int.class, int.class, List.class, List.class))),
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> EnsureSizeTests.class.getDeclaredMethod("testNoChange", List.class, int.class, int.class, int.class)),
+            JUnitTestRef.ofMethod(() -> EnsureSizeTestsPublic.class.getDeclaredMethod("testNoChange", List.class, int.class, int.class, int.class))));
 
     public static final Criterion H3_3 = createParentCriterion("3 c)", "ensureSize", H3_3_1, H3_3_2, H3_3_3, H3_3_4);
 
     public static final Criterion H3_4_1 = createCriterion("Die Methode [[[removeRightMostKey]]] funktioniert korrekt, wenn der Knoten ein Blattknoten ist und mehr als die Mindestanzahl an Schlüsselwerten besitzt.",
-        () -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveRightLeaf", List.class, int.class, String.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveRightLeaf", List.class, int.class, String.class, List.class)),
+            JUnitTestRef.ofMethod(() -> RemoveLRMostKeyTestsPublic.class.getDeclaredMethod("testRemoveRightLeaf", List.class, int.class, String.class, List.class))));
 
     public static final Criterion H3_4_2 = createCriterion("Die Methode [[[removeRightMostKey]]] funktioniert korrekt, wenn der Knoten kein Blattknoten ist und der zugehörige Blattknoten mehr als die Mindestanzahl an Schlüsselwerten besitzt.",
-        () -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveRightNoCorrection", List.class, int.class, String.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveRightNoCorrection", List.class, int.class, String.class, List.class)),
+            JUnitTestRef.ofMethod(() -> RemoveLRMostKeyTestsPublic.class.getDeclaredMethod("testRemoveRightNoCorrection", List.class, int.class, String.class, List.class))));
 
     public static final Criterion H3_4_3 = createCriterion("Die Methode [[[removeRightMostKey]]] funktioniert korrekt, wenn der Knoten kein Blattknoten ist und der zugehörige Blattknoten die Mindestanzahl an Schlüsselwerten besitzt.",
-        () -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveRightWithCorrection", List.class, int.class, String.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveRightWithCorrection", List.class, int.class, String.class, List.class)),
+            JUnitTestRef.ofMethod(() -> RemoveLRMostKeyTestsPublic.class.getDeclaredMethod("testRemoveRightWithCorrection", List.class, int.class, String.class, List.class))));
 
     public static final Criterion H3_4_4 = createCriterion("Die Methode [[[removeLeftMostKey]]] funktioniert korrekt.",
-        () -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveLeft", List.class, int.class, String.class, List.class));
+        JUnitTestRef.or(
+            JUnitTestRef.ofMethod(() -> RemoveLRMostKeyTests.class.getDeclaredMethod("testRemoveLeft", List.class, int.class, String.class, List.class)),
+            JUnitTestRef.ofMethod(() -> RemoveLRMostKeyTestsPublic.class.getDeclaredMethod("testRemoveLeft", List.class, int.class, String.class, List.class))));
 
     public static final Criterion H3_4 = createParentCriterion("3 d)", "removeRightMostKey und removeLeftMostKey", H3_4_1, H3_4_2, H3_4_3, H3_4_4);
 
