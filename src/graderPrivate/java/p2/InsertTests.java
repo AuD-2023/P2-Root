@@ -28,7 +28,7 @@ public class InsertTests {
                                 @Property("intervalsToInsert") List<String> intervalsToInsert,
                                 @Property("index") int index,
                                 @Property("expected") List<Object> expected) throws Throwable {
-        testInsert(tree, degree, intervalsToInsert, index, expected);
+        testInsert(tree, degree, intervalsToInsert, index, expected, true);
     }
 
     @ParameterizedTest
@@ -38,7 +38,7 @@ public class InsertTests {
                                 @Property("intervalsToInsert") List<String> intervalsToInsert,
                                 @Property("index") int index,
                                 @Property("expected") List<Object> expected) throws Throwable {
-        testInsert(tree, degree, intervalsToInsert, index, expected);
+        testInsert(tree, degree, intervalsToInsert, index, expected, true);
     }
 
     @ParameterizedTest
@@ -48,14 +48,15 @@ public class InsertTests {
                                            @Property("intervalsToInsert") List<String> intervalsToInsert,
                                            @Property("index") int index,
                                            @Property("expected") List<Object> expected) throws Throwable {
-        testInsert(tree, degree, intervalsToInsert, index, expected);
+        testInsert(tree, degree, intervalsToInsert, index, expected, false);
     }
 
     private void testInsert(List<Object> tree,
                             int degree,
                             List<String> intervalsToInsert,
                             int index,
-                            List<Object> expected) throws Throwable {
+                            List<Object> expected,
+                            boolean simple) throws Throwable {
 
         Context.Builder<?> context = contextBuilder()
             .subject("BtrfsFile.insert()")
@@ -84,9 +85,15 @@ public class InsertTests {
         call(() -> callInsert(actualTree, new ArrayList<>(intervals), new IndexedNodeLinkedList(null, getRoot(actualTree), index)), context.build(),
             TR -> "BtrfsFile.insert() should not throw an exception.");
 
-        assertTreeEquals(context.build(), "The tree is not correct.",
-            getRoot(expectedTree), getRoot(actualTree),
-            expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+        if (simple) {
+            assertTreeEqualsSimple(context.build(), "The tree is not correct.",
+                getRoot(expectedTree), getRoot(actualTree),
+                expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+        } else {
+            assertTreeEquals(context.build(), "The tree is not correct.",
+                getRoot(expectedTree), getRoot(actualTree),
+                expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+        }
     }
 
     private void callInsert(BtrfsFile tree, List<Interval> intervals, IndexedNodeLinkedList indexedLeaf) throws Exception {

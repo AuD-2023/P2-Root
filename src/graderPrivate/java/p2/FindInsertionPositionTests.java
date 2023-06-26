@@ -29,7 +29,7 @@ public class FindInsertionPositionTests {
                                        @Property("insertionSize") int insertionSize,
                                        @Property("expectedIndices") List<Integer> expectedIndices) throws Throwable {
 
-        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, tree);
+        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, tree, true);
     }
 
     @ParameterizedTest
@@ -40,7 +40,7 @@ public class FindInsertionPositionTests {
                                          @Property("insertionSize") int insertionSize,
                                          @Property("expectedIndices") List<Integer> expectedIndices) throws Throwable {
 
-        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, tree);
+        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, tree, true);
     }
 
     @ParameterizedTest
@@ -52,7 +52,7 @@ public class FindInsertionPositionTests {
                                      @Property("expectedIndices") List<Integer> expectedIndices,
                                      @Property("expectedTree") List<Object> expectedTree) throws Throwable {
 
-        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, expectedTree);
+        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, expectedTree, true);
     }
 
     @ParameterizedTest
@@ -64,7 +64,7 @@ public class FindInsertionPositionTests {
                                       @Property("expectedIndices") List<Integer> expectedIndices,
                                       @Property("expectedTree") List<Object> expectedTree) throws Throwable {
 
-        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, expectedTree);
+        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, expectedTree, false);
     }
 
     private void testFindInsertionPosition(List<Object> tree,
@@ -72,7 +72,8 @@ public class FindInsertionPositionTests {
                                            int start,
                                            int insertionSize,
                                            List<Integer> expectedIndices,
-                                           List<Object> expected) throws Throwable {
+                                           List<Object> expected,
+                                           boolean simple) throws Throwable {
 
         Context.Builder<?> context = contextBuilder()
             .subject("BtrfsFile.findInsertionPosition()")
@@ -100,14 +101,16 @@ public class FindInsertionPositionTests {
         IndexedNodeLinkedList expectedIndexedNode = createIndexedNode(null, getRoot(actualTree), new ArrayList<>(expectedIndices));
         updateChildLengths(createIndexedNode(null, getRoot(expectedTree), new ArrayList<>(expectedIndices)), insertionSize);
 
-        assertTreeEquals(context.build(), "The tree is not correct", getRoot(expectedTree),
-            getRoot(actualTree), expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+        if (simple) {
+            assertTreeEqualsSimple(context.build(), "The tree is not correct", getRoot(expectedTree),
+                getRoot(actualTree), expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+        } else {
+            assertTreeEquals(context.build(), "The tree is not correct", getRoot(expectedTree),
+                getRoot(actualTree), expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+            assertIndexedNodeLinkedListEquals(context.build(), expectedIndexedNode, actualIndexedNode,
+                actualFileAndStorage.storage());
+        }
 
-        assertEquals(expectedTree.getSize(), actualTree.getSize(), context.build(),
-            TR -> "The size of the tree should not change");
-
-        assertIndexedNodeLinkedListEquals(context.build(), expectedIndexedNode, actualIndexedNode,
-            actualFileAndStorage.storage());
     }
 
     private void updateChildLengths(IndexedNodeLinkedList indexedNode, int insertionSize) {

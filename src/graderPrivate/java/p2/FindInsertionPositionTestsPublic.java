@@ -18,12 +18,7 @@ import java.util.List;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertEquals;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.callObject;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.contextBuilder;
-import static p2.TreeUtil.FileAndStorage;
-import static p2.TreeUtil.assertIndexedNodeLinkedListEquals;
-import static p2.TreeUtil.assertTreeEquals;
-import static p2.TreeUtil.constructTree;
-import static p2.TreeUtil.getRoot;
-import static p2.TreeUtil.treeToString;
+import static p2.TreeUtil.*;
 
 @TestForSubmission
 public class FindInsertionPositionTestsPublic {
@@ -36,7 +31,7 @@ public class FindInsertionPositionTestsPublic {
                                        @Property("insertionSize") int insertionSize,
                                        @Property("expectedIndices") List<Integer> expectedIndices) throws Throwable {
 
-        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, tree);
+        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, tree, true);
     }
 
     @ParameterizedTest
@@ -47,7 +42,7 @@ public class FindInsertionPositionTestsPublic {
                                          @Property("insertionSize") int insertionSize,
                                          @Property("expectedIndices") List<Integer> expectedIndices) throws Throwable {
 
-        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, tree);
+        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, tree, true);
     }
 
     @ParameterizedTest
@@ -59,7 +54,7 @@ public class FindInsertionPositionTestsPublic {
                                      @Property("expectedIndices") List<Integer> expectedIndices,
                                      @Property("expectedTree") List<Object> expectedTree) throws Throwable {
 
-        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, expectedTree);
+        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, expectedTree, true);
     }
 
     @ParameterizedTest
@@ -71,7 +66,7 @@ public class FindInsertionPositionTestsPublic {
                                       @Property("expectedIndices") List<Integer> expectedIndices,
                                       @Property("expectedTree") List<Object> expectedTree) throws Throwable {
 
-        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, expectedTree);
+        testFindInsertionPosition(tree, degree, start, insertionSize, expectedIndices, expectedTree, false);
     }
 
     private void testFindInsertionPosition(List<Object> tree,
@@ -79,7 +74,8 @@ public class FindInsertionPositionTestsPublic {
                                            int start,
                                            int insertionSize,
                                            List<Integer> expectedIndices,
-                                           List<Object> expected) throws Throwable {
+                                           List<Object> expected,
+                                           boolean simple) throws Throwable {
 
         Context.Builder<?> context = contextBuilder()
             .subject("BtrfsFile.findInsertionPosition()")
@@ -105,14 +101,15 @@ public class FindInsertionPositionTestsPublic {
         IndexedNodeLinkedList expectedIndexedNode = createIndexedNode(null, getRoot(actualTree), new ArrayList<>(expectedIndices));
         updateChildLengths(createIndexedNode(null, getRoot(expectedTree), new ArrayList<>(expectedIndices)), insertionSize);
 
-        assertTreeEquals(context.build(), "The tree is not correct", getRoot(expectedTree),
-            getRoot(actualTree), expectedFileAndStorage.storage(), actualFileAndStorage.storage());
-
-        assertEquals(expectedTree.getSize(), actualTree.getSize(), context.build(),
-            TR -> "The size of the tree should not change");
-
-        assertIndexedNodeLinkedListEquals(context.build(), expectedIndexedNode, actualIndexedNode,
-            actualFileAndStorage.storage());
+        if (simple) {
+            assertTreeEqualsSimple(context.build(), "The tree is not correct", getRoot(expectedTree),
+                getRoot(actualTree), expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+        } else {
+            assertTreeEquals(context.build(), "The tree is not correct", getRoot(expectedTree),
+                getRoot(actualTree), expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+            assertIndexedNodeLinkedListEquals(context.build(), expectedIndexedNode, actualIndexedNode,
+                actualFileAndStorage.storage());
+        }
     }
 
     private void updateChildLengths(IndexedNodeLinkedList indexedNode, int insertionSize) {

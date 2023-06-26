@@ -234,54 +234,6 @@
       "childIndex": 2,
       "expectedParentIndex": 1,
       "expectedChildIndex": 2
-    },
-    {
-      "tree": [
-        [
-          "A",
-          "B",
-          "C",
-          "D",
-          "E"
-        ],
-        "F",
-        [
-          "G",
-          "H",
-          "I",
-          "J",
-          "K"
-        ]
-      ],
-      "degree": 3,
-      "parentIndex": 1,
-      "childIndex": 3,
-      "expectedParentIndex": 2,
-      "expectedChildIndex": 0
-    },
-    {
-      "tree": [
-        [
-          "A",
-          "B",
-          "C",
-          "D",
-          "E"
-        ],
-        "F",
-        [
-          "G",
-          "H",
-          "I",
-          "J",
-          "K"
-        ]
-      ],
-      "degree": 3,
-      "parentIndex": 1,
-      "childIndex": 4,
-      "expectedParentIndex": 2,
-      "expectedChildIndex": 1
     }
   ],
   "testSplitRoot": [

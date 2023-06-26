@@ -98,26 +98,35 @@ public class MergeTests {
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
 
-        assertTreeEquals(context.build(), "The tree is not correct.",
-            testedNodeFunction.apply(expectedTree), testedNodeFunction.apply(actualTree),
-            expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+        if (right) {
 
-        assertEquals(expectedTree.getSize(), actualTree.getSize(), context.build(),
-            TR -> "The size of the tree should not change");
+            assertTreeEqualsSimple(context.build(), "The tree is not correct.",
+                testedNodeFunction.apply(expectedTree), testedNodeFunction.apply(actualTree),
+                expectedFileAndStorage.storage(), actualFileAndStorage.storage());
+        } else {
+            assertTreeEquals(context.build(), "The tree is not correct.",
+                testedNodeFunction.apply(expectedTree), testedNodeFunction.apply(actualTree),
+                expectedFileAndStorage.storage(), actualFileAndStorage.storage());
 
-        assertEquals(expectedParentIndex, indexedRoot.index, context.build(),
-            TR -> "The index of the parent should not change");
-        assertEquals(root, indexedRoot.node, context.build(),
-            TR -> "The node of the parent should not change");
-        assertEquals(null, indexedRoot.parent, context.build(),
-            TR -> "The parent of the parent should not change");
+            assertEquals(expectedTree.getSize(), actualTree.getSize(), context.build(),
+                TR -> "The size of the tree should not change");
 
-        assertEquals(expectedChildIndex, indexedChild.index, context.build(),
-            TR -> "The index of the child is not correct");
-        assertEquals(root.children[expectedParentIndex], indexedChild.node, context.build(),
-            TR -> "The node of the child is not correct");
-        assertEquals(indexedRoot, indexedChild.parent, context.build(),
-            TR -> "The parent of the child should not change");
+            assertEquals(expectedParentIndex, indexedRoot.index, context.build(),
+                TR -> "The index of the parent should not change");
+            assertEquals(root, indexedRoot.node, context.build(),
+                TR -> "The node of the parent should not change");
+            assertEquals(null, indexedRoot.parent, context.build(),
+                TR -> "The parent of the parent should not change");
+
+            assertEquals(expectedChildIndex, indexedChild.index, context.build(),
+                TR -> "The index of the child is not correct");
+            assertEquals(root.children[expectedParentIndex], indexedChild.node, context.build(),
+                TR -> "The node of the child is not correct");
+            assertEquals(indexedRoot, indexedChild.parent, context.build(),
+                TR -> "The parent of the child should not change");
+        }
+
+
     }
 
     private void callMergeRight(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Exception {

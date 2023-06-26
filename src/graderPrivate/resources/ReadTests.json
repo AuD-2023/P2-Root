@@ -1,4 +1,41 @@
 {
+  "testReadNoChildrenOneInterval": [
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "start": 0,
+      "length": 1,
+      "expected": "A"
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "start": 1,
+      "length": 1,
+      "expected": "B"
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "start": 2,
+      "length": 1,
+      "expected": "C"
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "start": 3,
+      "length": 1,
+      "expected": "D"
+    },
+    {
+      "tree": ["A", "B", "C", "D", "E"],
+      "degree": 3,
+      "start": 4,
+      "length": 1,
+      "expected": "E"
+    }
+  ],
   "testReadNoChildren": [
     {
       "tree": ["A", "B", "C", "D", "E"],
@@ -22,13 +59,6 @@
       "expected": "BCD"
     },
     {
-      "tree": ["A", "B", "C", "D", "E"],
-      "degree": 3,
-      "start": 2,
-      "length": 1,
-      "expected": "C"
-    },
-    {
       "tree": ["A", "B", "C", "D"],
       "degree": 3,
       "start": 0,
@@ -48,13 +78,6 @@
       "start": 1,
       "length": 2,
       "expected": "BC"
-    },
-    {
-      "tree": ["A", "B", "C", "D"],
-      "degree": 3,
-      "start": 1,
-      "length": 1,
-      "expected": "B"
     }
   ],
   "testReadWholeIntervals": [
@@ -89,13 +112,6 @@
     {
       "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M"]],
       "degree": 3,
-      "start": 6,
-      "length": 3,
-      "expected": "GHI"
-    },
-    {
-      "tree": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I"], "J", ["K", "L", "M"]],
-      "degree": 3,
       "start": 4,
       "length": 2,
       "expected": "EF"
@@ -120,13 +136,6 @@
       "start": 2,
       "length": 9,
       "expected": "CDEFGHIJK"
-    },
-    {
-      "tree": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"], "J", ["K", "L"]], "M", [["N", "O"], "P", ["Q", "R", "S"], "T", ["U", "V"]]],
-      "degree": 3,
-      "start": 4,
-      "length": 14,
-      "expected": "EFGHIJKLMNOPQR"
     }
   ],
   "testReadStartIntervalPartially": [

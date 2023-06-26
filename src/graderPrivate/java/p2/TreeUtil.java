@@ -117,6 +117,50 @@ public class TreeUtil {
         }
     }
 
+
+    public static void assertTreeEqualsSimple(Context context, String message, BtrfsNode expectedNode, BtrfsNode actualNode,
+                                        Storage expectedStorage, Storage actualStorage) {
+
+        if (expectedNode == null) {
+            assertNull(actualNode, context,
+                TR -> message + " The node is not null. Expected Node: null");
+            return;
+        } else {
+            assertNotNull(actualNode, context,
+                TR -> message + " The node is null. Expected Node: %s".formatted(treeToString(expectedNode, expectedStorage)));
+        }
+
+        for (int i = 0; i < expectedNode.size; i++) {
+            int finalI = i;
+
+            byte[] expectedBytes = new byte[expectedNode.keys[i].length()];
+            expectedStorage.read(expectedNode.keys[i].start(), expectedBytes, 0, expectedNode.keys[i].length());
+            String expectedString = StringEncoder.INSTANCE.decode(expectedBytes);
+
+            assertNotNull(actualNode.keys[i], context, TR -> message + " The key at index %d of the node %s should not be <null>"
+                .formatted(finalI, treeToString(actualNode, actualStorage)));
+
+            byte[] actualBytes = new byte[actualNode.keys[i].length()];
+            actualStorage.read(actualNode.keys[i].start(), actualBytes, 0, actualNode.keys[i].length());
+            String actualString = StringEncoder.INSTANCE.decode(actualBytes);
+
+            assertEquals(expectedString, actualString, context,
+                TR -> message + " The key at index %d of the node %s is not correct. Expected Node: %s"
+                    .formatted(finalI, treeToString(actualNode, actualStorage), treeToString(expectedNode, expectedStorage)));
+        }
+
+        for (int i = 0; i < expectedNode.size + 1; i++) {
+            int finalI = i;
+
+            if (expectedNode.children[i] != null) {
+                assertNotNull(actualNode.children[i], context,
+                    TR -> message + " The child at index %d of the node %s is null. Expected Node: %s"
+                        .formatted(finalI, treeToString(actualNode, actualStorage), treeToString(expectedNode, expectedStorage)));
+                assertTreeEquals(context, message, expectedNode.children[i], actualNode.children[i], expectedStorage, actualStorage);
+            }
+        }
+    }
+
     public static String treeToString(BtrfsFile file, Storage storage) throws NoSuchFieldException, IllegalAccessException {
         return treeToString(getRoot(file), storage);
     }

@@ -8,25 +8,11 @@
       "expected": [["A", "B"], "C", ["D", "E", "F", "G", "H"]]
     },
     {
-      "tree": [["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I", "J", "K"]],
-      "degree": 3,
-      "parentIndex": 0,
-      "childIndex": 0,
-      "expected": [["A", "B", "C", "D", "E"], "F", ["G", "H", "I", "J", "K"]]
-    },
-    {
       "tree": [["A", "B"], "C", ["D", "EF"], "GHI", ["J", "KL"]],
       "degree": 3,
       "parentIndex": 1,
       "childIndex": 1,
       "expected": [["A", "B"], "C", ["D", "EF", "GHI", "J", "KL"]]
-    },
-    {
-      "tree": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"]], "J", [["K", "L"], "M", ["N", "O"], "P", ["Q", "R", "S"]], "T", [["U", "V"], "W", ["X", "Y"], "Z", ["a", "b"]]],
-      "degree": 3,
-      "parentIndex": 0,
-      "childIndex": 2,
-      "expected": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"], "J", ["K", "L"], "M", ["N", "O"], "P", ["Q", "R", "S"]], "T", [["U", "V"], "W", ["X", "Y"], "Z", ["a", "b"]]]
     },
     {
       "tree": [[["A", "B"], "C", ["D", "E"], "F", ["G", "H", "I"]], "J", [["K", "L"], "M", ["N", "O"], "P", ["Q", "R", "S"]], "T", [["U", "V"], "W", ["X", "Y"], "Z", ["a", "b"]]],

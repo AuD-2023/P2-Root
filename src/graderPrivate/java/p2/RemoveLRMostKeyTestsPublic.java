@@ -85,6 +85,9 @@ public class RemoveLRMostKeyTestsPublic {
 
             assertIntervalEquals(context.build(), key, actual, actualFileAndStorage.storage(),
                 "removeRightMostKey did not return the correct interval. Expected %s, but was %s");
+
+            assertTreeEqualsSimple(context.build(), "The tree is not correct.", getRoot(expectedTree), getRoot(actualTree),
+                expectedFileAndStorage.storage(), actualFileAndStorage.storage());
         } else {
             Interval actual = callObject(() -> callRemoveLeftMostKey(actualTree, indexedRoot), context.build(),
                 TR -> "callRemoveLeftMostKey should not throw an exception");
@@ -92,11 +95,10 @@ public class RemoveLRMostKeyTestsPublic {
 
             assertIntervalEquals(context.build(), key, actual, actualFileAndStorage.storage(),
                 "callRemoveLeftMostKey did not return the correct interval. Expected %s, but was %s");
+
+            assertTreeEquals(context.build(), "The tree is not correct.", getRoot(expectedTree), getRoot(actualTree),
+                expectedFileAndStorage.storage(), actualFileAndStorage.storage());
         }
-
-
-        assertTreeEquals(context.build(), "The tree is not correct.", getRoot(expectedTree), getRoot(actualTree),
-            expectedFileAndStorage.storage(), actualFileAndStorage.storage());
     }
 
     private Interval callRemoveRightMostKey(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Exception {

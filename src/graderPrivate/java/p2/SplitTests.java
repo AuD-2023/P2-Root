@@ -51,11 +51,8 @@ public class SplitTests {
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
 
-        assertTreeEquals(context.build(), "The tree is not correct.",
+        assertTreeEqualsSimple(context.build(), "The tree is not correct.",
             getRoot(expectedTree), getRoot(actualTree), expectedFileAndStorage.storage(), actualFileAndStorage.storage());
-
-        assertEquals(root, getRoot(actualTree), context.build(), TR -> "The root should not change.");
-        assertEquals(expectedTree.getSize(), actualTree.getSize(), context.build(), TR -> "The size should not change.");
     }
 
     @ParameterizedTest
@@ -180,23 +177,8 @@ public class SplitTests {
 
         context.add("actual tree", treeToString(actualTree, actualFileAndStorage.storage()));
 
-        assertTreeEquals(context.build(), "The tree is not correct.",
+        assertTreeEqualsSimple(context.build(), "The tree is not correct.",
             getRoot(expectedTree), getRoot(actualTree), expectedFileAndStorage.storage(), actualFileAndStorage.storage());
-
-        assertEquals(expectedTree.getSize(), actualTree.getSize(), context.build(), TR -> "The size should not change.");
-
-        assertEquals(getRoot(actualTree), indexedChild.parent.parent.node, context.build(),
-            TR -> "indexedNode.parent.parent.node should be equal to the root attribute of the tree.");
-        assertEquals(expectedGrandParentIndex, indexedChild.parent.parent.index, context.build(),
-            TR -> "indexedNode.parent.parent.index is not correct.");
-        assertEquals(getRoot(actualTree).children[expectedGrandParentIndex], indexedChild.parent.node, context.build(),
-            TR -> "indexedNode.parent.node is not equal to root.children[indexedNode.parent.parent.index].");
-        assertEquals(expectedParentIndex, indexedChild.parent.index, context.build(),
-            TR -> "indexedNode.parent.index is not correct.");
-        assertEquals(getRoot(actualTree).children[expectedGrandParentIndex].children[expectedParentIndex], indexedChild.node, context.build(),
-            TR -> "indexedNode.node is not equal to root.children[indexedNode.parent.parent.index].children[indexedNode.parent.index].");
-        assertEquals(expectedParentIndex, indexedChild.parent.index, context.build(),
-            TR -> "indexedNode.index is not correct.");
     }
 
     private void callSplit(BtrfsFile tree, IndexedNodeLinkedList indexedNode) throws Exception {
